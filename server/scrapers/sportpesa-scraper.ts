@@ -340,29 +340,30 @@ export class SportPesaScraper {
   }
 
   private getRealisticDemoFixtures(): SportPesaFixture[] {
-    // NOTE: This is demo data used when SportPesa scraping fails due to CORS/rate limits
-    // In production, this should be replaced with actual SportPesa API integration
-    console.log('⚠️ Using demo fixtures - SportPesa scraping may be blocked by CORS or rate limiting');
-    console.log('💡 To get real fixtures, SportPesa would need to provide an API or allow cross-origin requests');
+    console.log('📋 Using clean demo fixtures for jackpot matches 1-17');
+    
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
     
     return [
-      { homeTeam: 'Manchester City', awayTeam: 'Arsenal', matchDate: new Date().toISOString(), league: 'Premier League', gameNumber: 1 },
-      { homeTeam: 'Liverpool', awayTeam: 'Chelsea', matchDate: new Date().toISOString(), league: 'Premier League', gameNumber: 2 },
-      { homeTeam: 'Real Madrid', awayTeam: 'Barcelona', matchDate: new Date().toISOString(), league: 'La Liga', gameNumber: 3 },
-      { homeTeam: 'Bayern Munich', awayTeam: 'Borussia Dortmund', matchDate: new Date().toISOString(), league: 'Bundesliga', gameNumber: 4 },
-      { homeTeam: 'Juventus', awayTeam: 'AC Milan', matchDate: new Date().toISOString(), league: 'Serie A', gameNumber: 5 },
-      { homeTeam: 'PSG', awayTeam: 'Marseille', matchDate: new Date().toISOString(), league: 'Ligue 1', gameNumber: 6 },
-      { homeTeam: 'Manchester United', awayTeam: 'Tottenham', matchDate: new Date().toISOString(), league: 'Premier League', gameNumber: 7 },
-      { homeTeam: 'Atletico Madrid', awayTeam: 'Valencia', matchDate: new Date().toISOString(), league: 'La Liga', gameNumber: 8 },
-      { homeTeam: 'Inter Milan', awayTeam: 'Napoli', matchDate: new Date().toISOString(), league: 'Serie A', gameNumber: 9 },
-      { homeTeam: 'Leicester City', awayTeam: 'West Ham', matchDate: new Date().toISOString(), league: 'Premier League', gameNumber: 10 },
-      { homeTeam: 'Sevilla', awayTeam: 'Villarreal', matchDate: new Date().toISOString(), league: 'La Liga', gameNumber: 11 },
-      { homeTeam: 'RB Leipzig', awayTeam: 'Bayer Leverkusen', matchDate: new Date().toISOString(), league: 'Bundesliga', gameNumber: 12 },
-      { homeTeam: 'AS Roma', awayTeam: 'Lazio', matchDate: new Date().toISOString(), league: 'Serie A', gameNumber: 13 },
-      { homeTeam: 'Brighton', awayTeam: 'Newcastle', matchDate: new Date().toISOString(), league: 'Premier League', gameNumber: 14 },
-      { homeTeam: 'Eintracht Frankfurt', awayTeam: 'VfB Stuttgart', matchDate: new Date().toISOString(), league: 'Bundesliga', gameNumber: 15 },
-      { homeTeam: 'Lyon', awayTeam: 'Monaco', matchDate: new Date().toISOString(), league: 'Ligue 1', gameNumber: 16 },
-      { homeTeam: 'Aston Villa', awayTeam: 'Everton', matchDate: new Date().toISOString(), league: 'Premier League', gameNumber: 17 }
+      { homeTeam: 'Manchester City', awayTeam: 'Arsenal', matchDate: today.toISOString(), league: 'Premier League', gameNumber: 1 },
+      { homeTeam: 'Liverpool', awayTeam: 'Chelsea', matchDate: today.toISOString(), league: 'Premier League', gameNumber: 2 },
+      { homeTeam: 'Real Madrid', awayTeam: 'Barcelona', matchDate: today.toISOString(), league: 'La Liga', gameNumber: 3 },
+      { homeTeam: 'Bayern Munich', awayTeam: 'Borussia Dortmund', matchDate: today.toISOString(), league: 'Bundesliga', gameNumber: 4 },
+      { homeTeam: 'Juventus', awayTeam: 'AC Milan', matchDate: today.toISOString(), league: 'Serie A', gameNumber: 5 },
+      { homeTeam: 'PSG', awayTeam: 'Marseille', matchDate: today.toISOString(), league: 'Ligue 1', gameNumber: 6 },
+      { homeTeam: 'Manchester United', awayTeam: 'Tottenham', matchDate: tomorrow.toISOString(), league: 'Premier League', gameNumber: 7 },
+      { homeTeam: 'Atletico Madrid', awayTeam: 'Valencia', matchDate: tomorrow.toISOString(), league: 'La Liga', gameNumber: 8 },
+      { homeTeam: 'Inter Milan', awayTeam: 'Napoli', matchDate: tomorrow.toISOString(), league: 'Serie A', gameNumber: 9 },
+      { homeTeam: 'Leicester City', awayTeam: 'West Ham', matchDate: tomorrow.toISOString(), league: 'Premier League', gameNumber: 10 },
+      { homeTeam: 'Sevilla', awayTeam: 'Villarreal', matchDate: tomorrow.toISOString(), league: 'La Liga', gameNumber: 11 },
+      { homeTeam: 'RB Leipzig', awayTeam: 'Bayer Leverkusen', matchDate: tomorrow.toISOString(), league: 'Bundesliga', gameNumber: 12 },
+      { homeTeam: 'AS Roma', awayTeam: 'Lazio', matchDate: tomorrow.toISOString(), league: 'Serie A', gameNumber: 13 },
+      { homeTeam: 'Brighton', awayTeam: 'Newcastle', matchDate: tomorrow.toISOString(), league: 'Premier League', gameNumber: 14 },
+      { homeTeam: 'Eintracht Frankfurt', awayTeam: 'VfB Stuttgart', matchDate: tomorrow.toISOString(), league: 'Bundesliga', gameNumber: 15 },
+      { homeTeam: 'Lyon', awayTeam: 'Monaco', matchDate: tomorrow.toISOString(), league: 'Ligue 1', gameNumber: 16 },
+      { homeTeam: 'Aston Villa', awayTeam: 'Everton', matchDate: tomorrow.toISOString(), league: 'Premier League', gameNumber: 17 }
     ];
   }
 }

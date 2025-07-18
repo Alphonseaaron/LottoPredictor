@@ -21,8 +21,15 @@ export class PythonAnalyzer {
     h2h: H2HRecord,
     sources?: string[]
   ): Promise<PythonAnalysisResult> {
-    // Use comprehensive JavaScript analysis instead of Python
-    return this.getComprehensiveAnalysis(homeTeam, awayTeam, homeStats, awayStats, h2h, sources || []);
+    // Filter sources to only include match-relevant data, no SEO tags or metadata
+    const cleanSources = (sources || []).filter(source => 
+      !source.includes('seo_tags') && 
+      !source.includes('retriesLeft') && 
+      !source.includes('description') &&
+      source.includes('vs')
+    );
+    
+    return this.getComprehensiveAnalysis(homeTeam, awayTeam, homeStats, awayStats, h2h, cleanSources);
   }
 
   private async runPythonScript(dataFile: string): Promise<PythonAnalysisResult> {
