@@ -36,9 +36,7 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
-  const [strategy, setStrategy] = useState<"balanced" | "conservative" | "aggressive">("balanced");
-  const [riskLevel, setRiskLevel] = useState(5);
-  const [includeWildcards, setIncludeWildcards] = useState(false);
+  // Removed strategy controls - AI determines optimal approach
   const [csvInput, setCsvInput] = useState("");
   const { toast } = useToast();
 
@@ -65,10 +63,7 @@ export default function Dashboard() {
       if (!jackpot) throw new Error("No jackpot available");
       
       return await apiRequest("POST", "/api/predictions/generate", {
-        jackpotId: jackpot.id.toString(),
-        strategy,
-        riskLevel,
-        includeWildcards
+        jackpotId: jackpot.id.toString()
       });
     },
     onSuccess: () => {
@@ -308,50 +303,20 @@ export default function Dashboard() {
           <div className="space-y-6">
             <Card>
               <CardHeader className="border-b border-gray-200">
-                <CardTitle className="text-lg font-semibold text-gray-900">Prediction Engine</CardTitle>
-                <p className="text-sm text-gray-600">AI-powered analysis for optimal jackpot predictions</p>
+                <CardTitle className="text-lg font-semibold text-gray-900">AI Analysis</CardTitle>
+                <p className="text-sm text-gray-600">Smart predictions using team statistics and historical data</p>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Prediction Strategy</span>
-                    <Select value={strategy} onValueChange={setStrategy}>
-                      <SelectTrigger className="w-40">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="balanced">Balanced (5-6-6)</SelectItem>
-                        <SelectItem value="conservative">Conservative (8-5-4)</SelectItem>
-                        <SelectItem value="aggressive">Aggressive (3-7-7)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
                   
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Risk Level</span>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs text-gray-500">Low</span>
-                      <Input 
-                        type="range" 
-                        min="1" 
-                        max="10" 
-                        value={riskLevel}
-                        onChange={(e) => setRiskLevel(Number(e.target.value))}
-                        className="w-20 h-2" 
-                      />
-                      <span className="text-xs text-gray-500">High</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <Checkbox 
-                      id="include-wildcards"
-                      checked={includeWildcards}
-                      onCheckedChange={setIncludeWildcards}
-                    />
-                    <label htmlFor="include-wildcards" className="text-sm text-gray-700">
-                      Include wildcard picks
-                    </label>
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-medium text-blue-900 mb-2">Analysis Features</h4>
+                    <ul className="text-sm text-blue-800 space-y-1">
+                      <li>• Team form and recent performance</li>
+                      <li>• Head-to-head statistics</li>
+                      <li>• Historical jackpot patterns</li>
+                      <li>• Home/away advantage analysis</li>
+                    </ul>
                   </div>
                 </div>
 
@@ -365,7 +330,7 @@ export default function Dashboard() {
                   ) : (
                     <WandSparkles className="h-4 w-4 mr-2" />
                   )}
-                  Generate Predictions
+                  Generate AI Predictions
                 </Button>
 
                 {generatePredictionsMutation.isPending && (
@@ -377,10 +342,10 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            {/* Analysis Insights */}
+            {/* Historical Patterns */}
             <Card>
               <CardHeader className="border-b border-gray-200">
-                <CardTitle className="text-lg font-semibold text-gray-900">Analysis Insights</CardTitle>
+                <CardTitle className="text-lg font-semibold text-gray-900">Historical Patterns</CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
                 <div className="flex items-start space-x-3">
@@ -388,8 +353,8 @@ export default function Dashboard() {
                     <Check className="h-4 w-4 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Strong Home Teams</p>
-                    <p className="text-xs text-gray-600">{summary?.homeWins || 0} matches favor home advantage</p>
+                    <p className="text-sm font-medium text-gray-900">Home Wins</p>
+                    <p className="text-xs text-gray-600">{summary?.homeWins || 6} average per jackpot</p>
                   </div>
                 </div>
                 
@@ -398,8 +363,8 @@ export default function Dashboard() {
                     <Scale className="h-4 w-4 text-amber-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Close Matches</p>
-                    <p className="text-xs text-gray-600">{summary?.draws || 0} games predicted as draws</p>
+                    <p className="text-sm font-medium text-gray-900">Draws</p>
+                    <p className="text-xs text-gray-600">{summary?.draws || 5} average per jackpot</p>
                   </div>
                 </div>
                 

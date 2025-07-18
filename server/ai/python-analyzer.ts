@@ -38,7 +38,11 @@ export class PythonAnalyzer {
       const result = await this.runPythonScript(tempFile);
       
       // Clean up temporary file
-      await unlink(tempFile);
+      try {
+        await unlink(tempFile);
+      } catch (e) {
+        // File might not exist, ignore
+      }
 
       return result;
 

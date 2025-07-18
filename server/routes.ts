@@ -60,47 +60,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const predictions = [];
       
-      // Generate balanced predictions using Python analyzer
+      // Generate AI-powered predictions using real team statistics
       const { pythonAnalyzer } = await import("./ai/python-analyzer");
+      const { teamStatsScaper } = await import("./scrapers/team-stats-scraper");
+      const { jackpotHistoryScraper } = await import("./scrapers/jackpot-history-scraper");
+      
+      console.log('🔍 Fetching historical jackpot patterns...');
+      const jackpotHistory = await jackpotHistoryScraper.getJackpotHistory(20);
+      const frequencyAnalysis = jackpotHistoryScraper.getFrequencyAnalysis(jackpotHistory);
+      
+      console.log('📊 Historical analysis:', {
+        averagePattern: `${frequencyAnalysis.averageHomeWins}-${frequencyAnalysis.averageDraws}-${frequencyAnalysis.averageAwayWins}`,
+        mostCommon: frequencyAnalysis.mostCommonOutcome
+      });
       
       for (let i = 0; i < fixtures.length; i++) {
         const fixture = fixtures[i];
         
-        // Generate prediction using Python analyzer
+        console.log(`🏟️ Analyzing: ${fixture.homeTeam} vs ${fixture.awayTeam}`);
+        
+        // Fetch team statistics
+        const [homeStats, awayStats] = await Promise.all([
+          teamStatsScaper.getTeamStats(fixture.homeTeam),
+          teamStatsScaper.getTeamStats(fixture.awayTeam)
+        ]);
+        
+        // Get head-to-head record
+        const h2hRecord = await teamStatsScaper.getH2HRecord(fixture.homeTeam, fixture.awayTeam);
+        
+        // Generate prediction using Python analyzer with real data
         const analysis = await pythonAnalyzer.analyzeMatch(
           fixture.homeTeam,
           fixture.awayTeam,
-          {
-            position: Math.floor(Math.random() * 20) + 1,
-            points: Math.floor(Math.random() * 50) + 10,
-            form: 'WWDLL',
-            goalsFor: Math.floor(Math.random() * 30) + 10,
-            goalsAgainst: Math.floor(Math.random() * 25) + 5,
-            homeRecord: { wins: 5, draws: 3, losses: 2 },
-            awayRecord: { wins: 3, draws: 4, losses: 3 }
-          },
-          {
-            position: Math.floor(Math.random() * 20) + 1,
-            points: Math.floor(Math.random() * 50) + 10,
-            form: 'WDWLL',
-            goalsFor: Math.floor(Math.random() * 25) + 8,
-            goalsAgainst: Math.floor(Math.random() * 30) + 8,
-            homeRecord: { wins: 4, draws: 2, losses: 4 },
-            awayRecord: { wins: 2, draws: 5, losses: 3 }
-          },
-          {
-            totalMeetings: 10,
-            homeWins: 4,
-            draws: 3,
-            awayWins: 3
-          }
+          homeStats,
+          awayStats,
+          h2hRecord
         );
         
         const prediction = await storage.createPrediction({
           fixtureId: fixture.id,
           prediction: analysis.prediction,
           confidence: analysis.confidence,
-          reasoning: analysis.reasoning,
+          reasoning: `${analysis.reasoning} (Pattern: ${frequencyAnalysis.averageHomeWins}-${frequencyAnalysis.averageDraws}-${frequencyAnalysis.averageAwayWins})`,
           strategy: 'ai-analysis'
         });
         predictions.push(prediction);
@@ -191,6 +192,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating jackpot:", error);
       res.status(500).json({ message: "Failed to create jackpot" });
+    }
+  });
+
+  // Get jackpot history and winning patterns
+  app.get("/api/jackpot/history", async (req, res) => {
+    try {
+      const { jackpotHistoryScraper } = await import("./scrapers/jackpot-history-scraper");
+      
+      const limit = parseInt(req.query.limit as string) || 20;
+      const history = await jackpotHistoryScraper.getJackpotHistory(limit);
+      const analysis = jackpotHistoryScraper.getFrequencyAnalysis(history);
+      
+      res.json({
+        history,
+        analysis,
+        summary: {
+          totalJackpots: history.length,
+          averagePattern: `${analysis.averageHomeWins}-${analysis.averageDraws}-${analysis.averageAwayWins}`,
+          mostCommonOutcome: analysis.mostCommonOutcome
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching jackpot history:", error);
+      res.status(500).json({ message: "Failed to fetch jackpot history" });
     }
   });
 
