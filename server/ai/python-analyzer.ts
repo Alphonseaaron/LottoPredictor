@@ -18,38 +18,11 @@ export class PythonAnalyzer {
     awayTeam: string,
     homeStats: TeamStats,
     awayStats: TeamStats,
-    h2h: H2HRecord
+    h2h: H2HRecord,
+    sources?: string[]
   ): Promise<PythonAnalysisResult> {
-    try {
-      // Prepare data for Python analysis
-      const matchData = {
-        homeTeam,
-        awayTeam,
-        homeStats,
-        awayStats,
-        h2h
-      };
-
-      // Create temporary file with match data
-      const tempFile = join(process.cwd(), `match_${Date.now()}.json`);
-      await writeFile(tempFile, JSON.stringify(matchData, null, 2));
-
-      // Run Python analysis script
-      const result = await this.runPythonScript(tempFile);
-      
-      // Clean up temporary file
-      try {
-        await unlink(tempFile);
-      } catch (e) {
-        // File might not exist, ignore
-      }
-
-      return result;
-
-    } catch (error) {
-      console.error('Error in Python match analysis:', error);
-      return this.getFallbackAnalysis(homeTeam, awayTeam, homeStats, awayStats);
-    }
+    // Use comprehensive JavaScript analysis instead of Python
+    return this.getComprehensiveAnalysis(homeTeam, awayTeam, homeStats, awayStats, h2h, sources || []);
   }
 
   private async runPythonScript(dataFile: string): Promise<PythonAnalysisResult> {
@@ -214,52 +187,137 @@ except Exception as e:
     });
   }
 
-  private getFallbackAnalysis(
+  private getComprehensiveAnalysis(
     homeTeam: string,
     awayTeam: string,
     homeStats: TeamStats,
-    awayStats: TeamStats
+    awayStats: TeamStats,
+    h2h: H2HRecord,
+    sources: string[]
   ): PythonAnalysisResult {
-    // JavaScript fallback when Python fails
+    // Comprehensive football match analysis
     let homeScore = 55; // Base home advantage
+    let analysisFactors: string[] = [];
+    let dataSource = "Team statistics analysis";
     
-    // Form analysis
+    // 1. Form analysis (recent performance)
     const homeWins = homeStats.form.split('').filter(r => r === 'W').length;
     const awayWins = awayStats.form.split('').filter(r => r === 'W').length;
-    homeScore += (homeWins - awayWins) * 5;
+    const homeDraw = homeStats.form.split('').filter(r => r === 'D').length;
+    const awayDraw = awayStats.form.split('').filter(r => r === 'D').length;
     
-    // Position factor
-    homeScore += (awayStats.position - homeStats.position) * 2;
+    const formDiff = homeWins - awayWins;
+    homeScore += formDiff * 8;
+    analysisFactors.push(`Form: ${homeTeam} (${homeWins}W-${homeDraw}D) vs ${awayTeam} (${awayWins}W-${awayDraw}D)`);
+    
+    // 2. League position analysis
+    const positionDiff = awayStats.position - homeStats.position;
+    homeScore += positionDiff * 3;
+    analysisFactors.push(`Position: ${homeTeam} (${homeStats.position}) vs ${awayTeam} (${awayStats.position})`);
+    
+    // 3. Goals scored/conceded ratio
+    const homeAttackStrength = homeStats.goalsFor / (homeStats.goalsAgainst + 1);
+    const awayAttackStrength = awayStats.goalsFor / (awayStats.goalsAgainst + 1);
+    const attackDiff = (homeAttackStrength - awayAttackStrength) * 10;
+    homeScore += attackDiff;
+    analysisFactors.push(`Attack: ${homeTeam} ratio ${homeAttackStrength.toFixed(2)} vs ${awayTeam} ratio ${awayAttackStrength.toFixed(2)}`);
+    
+    // 4. Home/Away record analysis
+    const homeHomeRecord = homeStats.homeRecord;
+    const awayAwayRecord = awayStats.awayRecord;
+    const homeHomeStrength = (homeHomeRecord.wins * 3 + homeHomeRecord.draws) / ((homeHomeRecord.wins + homeHomeRecord.draws + homeHomeRecord.losses) * 3);
+    const awayAwayStrength = (awayAwayRecord.wins * 3 + awayAwayRecord.draws) / ((awayAwayRecord.wins + awayAwayRecord.draws + awayAwayRecord.losses) * 3);
+    
+    const recordDiff = (homeHomeStrength - awayAwayStrength) * 15;
+    homeScore += recordDiff;
+    analysisFactors.push(`Home/Away: ${homeTeam} home ${(homeHomeStrength * 100).toFixed(0)}% vs ${awayTeam} away ${(awayAwayStrength * 100).toFixed(0)}%`);
+    
+    // 5. Head-to-Head analysis
+    if (h2h.totalMeetings > 0) {
+      const h2hHomeAdvantage = (h2h.homeWins - h2h.awayWins) / h2h.totalMeetings * 20;
+      homeScore += h2hHomeAdvantage;
+      analysisFactors.push(`H2H: ${h2h.homeWins}W-${h2h.draws}D-${h2h.awayWins}L in ${h2h.totalMeetings} meetings`);
+    }
     
     let prediction: '1' | 'X' | '2';
     let confidence: number;
-    let reasoning: string;
-    let riskLevel: 'low' | 'medium' | 'high';
     
-    if (homeScore > 65) {
+    // Determine prediction and confidence
+    if (homeScore >= 70) {
       prediction = '1';
-      confidence = Math.min(85, homeScore);
-      reasoning = `${homeTeam} favored due to home advantage and superior form`;
-      riskLevel = confidence > 75 ? 'low' : 'medium';
-    } else if (homeScore < 35) {
-      prediction = '2';
-      confidence = Math.min(85, 100 - homeScore);
-      reasoning = `${awayTeam} shows stronger recent performance`;
-      riskLevel = confidence > 75 ? 'low' : 'medium';
+      confidence = Math.min(95, 60 + (homeScore - 70) * 0.5);
+    } else if (homeScore <= 40) {
+      prediction = '2'; 
+      confidence = Math.min(95, 60 + (40 - homeScore) * 0.5);
     } else {
       prediction = 'X';
-      confidence = 65;
-      reasoning = 'Teams evenly matched, draw most likely';
-      riskLevel = 'medium';
+      confidence = Math.min(85, 55 + Math.abs(55 - homeScore) * 0.3);
     }
-    
+
+    // Create detailed reasoning
+    const reasoning = this.buildDetailedReasoning(
+      homeTeam, 
+      awayTeam, 
+      prediction, 
+      homeScore, 
+      analysisFactors, 
+      homeStats, 
+      awayStats, 
+      h2h
+    );
+
     return {
       prediction,
       confidence: Math.round(confidence),
       reasoning,
-      keyFactors: ['Recent form', 'League position', 'Home advantage'],
-      riskLevel
+      keyFactors: analysisFactors,
+      riskLevel: confidence > 80 ? 'low' : confidence > 65 ? 'medium' : 'high'
     };
+  }
+
+  private buildDetailedReasoning(
+    homeTeam: string,
+    awayTeam: string,
+    prediction: '1' | 'X' | '2',
+    homeScore: number,
+    factors: string[],
+    homeStats: TeamStats,
+    awayStats: TeamStats,
+    h2h: H2HRecord
+  ): string {
+    const predictionText = prediction === '1' ? `${homeTeam} victory` : 
+                          prediction === 'X' ? 'Draw' : `${awayTeam} victory`;
+    
+    let reasoning = `**${predictionText} predicted** - `;
+    
+    // Main reasoning based on score
+    if (homeScore >= 70) {
+      reasoning += `Strong home advantage (Score: ${homeScore.toFixed(1)}/100). `;
+    } else if (homeScore <= 40) {
+      reasoning += `Away team shows superior form (Score: ${homeScore.toFixed(1)}/100). `;
+    } else {
+      reasoning += `Evenly matched teams likely to draw (Score: ${homeScore.toFixed(1)}/100). `;
+    }
+
+    // Add key statistical insights
+    reasoning += `\n\n**Key Analysis:**\n`;
+    factors.forEach((factor, index) => {
+      reasoning += `${index + 1}. ${factor}\n`;
+    });
+
+    // Add contextual information
+    reasoning += `\n**Team Performance:**\n`;
+    reasoning += `• ${homeTeam}: ${homeStats.points}pts, Position ${homeStats.position}, Form: ${homeStats.form}\n`;
+    reasoning += `• ${awayTeam}: ${awayStats.points}pts, Position ${awayStats.position}, Form: ${awayStats.form}\n`;
+
+    if (h2h.totalMeetings > 0) {
+      reasoning += `\n**Historical Record:** ${homeTeam} ${h2h.homeWins}W-${h2h.draws}D-${h2h.awayWins}L vs ${awayTeam}\n`;
+    }
+
+    // Add data source note
+    reasoning += `\n*Analysis based on league statistics, team form, and historical data*`;
+
+    return reasoning;
   }
 }
 

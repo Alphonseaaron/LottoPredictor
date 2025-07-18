@@ -79,7 +79,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`🏟️ Analyzing: ${fixture.homeTeam} vs ${fixture.awayTeam}`);
         
-        // Fetch team statistics
+        // Fetch comprehensive team data
         const [homeStats, awayStats] = await Promise.all([
           teamStatsScaper.getTeamStats(fixture.homeTeam),
           teamStatsScaper.getTeamStats(fixture.awayTeam)
@@ -88,21 +88,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Get head-to-head record
         const h2hRecord = await teamStatsScaper.getH2HRecord(fixture.homeTeam, fixture.awayTeam);
         
-        // Generate prediction using Python analyzer with real data
+        console.log(`📊 Stats: ${fixture.homeTeam} (${homeStats.position}th, ${homeStats.form}) vs ${fixture.awayTeam} (${awayStats.position}th, ${awayStats.form})`);
+        
+        // Generate comprehensive prediction analysis
         const analysis = await pythonAnalyzer.analyzeMatch(
           fixture.homeTeam,
           fixture.awayTeam,
           homeStats,
           awayStats,
-          h2hRecord
+          h2hRecord,
+          ['team-stats', 'h2h-analysis', 'form-analysis']
         );
         
         const prediction = await storage.createPrediction({
           fixtureId: fixture.id,
           prediction: analysis.prediction,
           confidence: analysis.confidence,
-          reasoning: `${analysis.reasoning} (Pattern: ${frequencyAnalysis.averageHomeWins}-${frequencyAnalysis.averageDraws}-${frequencyAnalysis.averageAwayWins})`,
-          strategy: 'ai-analysis'
+          reasoning: `${analysis.reasoning}\n\n**Historical Pattern:** Average jackpot has ${frequencyAnalysis.averageHomeWins} home wins, ${frequencyAnalysis.averageDraws} draws, ${frequencyAnalysis.averageAwayWins} away wins`,
+          strategy: 'comprehensive-analysis'
         });
         predictions.push(prediction);
       }

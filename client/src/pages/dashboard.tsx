@@ -303,20 +303,44 @@ export default function Dashboard() {
           <div className="space-y-6">
             <Card>
               <CardHeader className="border-b border-gray-200">
-                <CardTitle className="text-lg font-semibold text-gray-900">AI Analysis</CardTitle>
-                <p className="text-sm text-gray-600">Smart predictions using team statistics and historical data</p>
+                <CardTitle className="text-lg font-semibold text-gray-900">Complete Analysis & Predictions</CardTitle>
+                <p className="text-sm text-gray-600">Comprehensive analysis using team statistics, form data, and historical patterns</p>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
                 <div className="space-y-3">
                   
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-blue-900 mb-2">Analysis Features</h4>
-                    <ul className="text-sm text-blue-800 space-y-1">
-                      <li>• Team form and recent performance</li>
-                      <li>• Head-to-head statistics</li>
-                      <li>• Historical jackpot patterns</li>
-                      <li>• Home/away advantage analysis</li>
-                    </ul>
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                    <h4 className="font-medium text-blue-900 mb-3">Automatic Analysis Process</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                      <div className="flex items-start space-x-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                        <div>
+                          <p className="font-medium text-blue-800">Team Statistics</p>
+                          <p className="text-blue-600">Form, position, goals, records</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                        <div>
+                          <p className="font-medium text-blue-800">Head-to-Head Analysis</p>
+                          <p className="text-blue-600">Historical matchups & trends</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <div className="w-2 h-2 bg-purple-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                        <div>
+                          <p className="font-medium text-blue-800">Jackpot Patterns</p>
+                          <p className="text-blue-600">Historical winning combinations</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <div className="w-2 h-2 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                        <div>
+                          <p className="font-medium text-blue-800">Home/Away Advantage</p>
+                          <p className="text-blue-600">Venue-specific performance</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -330,13 +354,21 @@ export default function Dashboard() {
                   ) : (
                     <WandSparkles className="h-4 w-4 mr-2" />
                   )}
-                  Generate AI Predictions
+                  Generate Complete Analysis & Predictions
                 </Button>
 
                 {generatePredictionsMutation.isPending && (
-                  <div className="flex items-center justify-center py-4">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                    <span className="ml-3 text-sm text-gray-600">Analyzing matches...</span>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                      <span className="ml-3 text-sm text-gray-600">Running comprehensive analysis...</span>
+                    </div>
+                    <div className="text-xs text-gray-500 space-y-1">
+                      <p>• Fetching team statistics and form data</p>
+                      <p>• Analyzing head-to-head records</p>
+                      <p>• Reviewing historical jackpot patterns</p>
+                      <p>• Computing confidence scores</p>
+                    </div>
                   </div>
                 )}
               </CardContent>
