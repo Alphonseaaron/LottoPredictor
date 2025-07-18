@@ -39,7 +39,7 @@ export class AutomatedPredictionService {
       // Step 2: Create or update jackpot in database
       const jackpot = await storage.createJackpot({
         amount: jackpotData.amount,
-        drawDate: jackpotData.drawDate,
+        drawDate: new Date(jackpotData.drawDate),
         status: 'active'
       });
       
@@ -50,7 +50,7 @@ export class AutomatedPredictionService {
           storage.createFixture({
             homeTeam: fixture.homeTeam,
             awayTeam: fixture.awayTeam,
-            matchDate: fixture.matchDate,
+            matchDate: new Date(fixture.matchDate),
             jackpotId: jackpot.id.toString()
           })
         )

@@ -264,23 +264,23 @@ export class SportPesaScraper {
 
   private getRealisticDemoFixtures(): SportPesaFixture[] {
     const realFixtures = [
-      { home: 'Manchester City', away: 'Liverpool', league: 'Premier League' },
-      { home: 'Chelsea', away: 'Arsenal', league: 'Premier League' },
-      { home: 'Real Madrid', away: 'Barcelona', league: 'La Liga' },
-      { home: 'Bayern Munich', away: 'Borussia Dortmund', league: 'Bundesliga' },
-      { home: 'PSG', away: 'Marseille', league: 'Ligue 1' },
-      { home: 'Juventus', away: 'Inter Milan', league: 'Serie A' },
-      { home: 'Tottenham', away: 'West Ham', league: 'Premier League' },
-      { home: 'Atletico Madrid', away: 'Sevilla', league: 'La Liga' },
-      { home: 'AC Milan', away: 'Napoli', league: 'Serie A' },
-      { home: 'Bayer Leverkusen', away: 'RB Leipzig', league: 'Bundesliga' },
-      { home: 'Lyon', away: 'Monaco', league: 'Ligue 1' },
-      { home: 'Brighton', away: 'Crystal Palace', league: 'Premier League' },
-      { home: 'Valencia', away: 'Real Sociedad', league: 'La Liga' },
-      { home: 'Fiorentina', away: 'Roma', league: 'Serie A' },
-      { home: 'Eintracht Frankfurt', away: 'Wolfsburg', league: 'Bundesliga' },
-      { home: 'Newcastle', away: 'Aston Villa', league: 'Premier League' },
-      { home: 'Athletic Bilbao', away: 'Villarreal', league: 'La Liga' }
+      { home: 'FK Mlada Boleslav', away: 'FC Slovan Liberec', league: 'Czech First League' },
+      { home: 'FC Farul Constanta', away: 'ASC Otelul Galati', league: 'Romanian Liga I' },
+      { home: 'FC Kuressaare', away: 'Parnu JK Vaprus', league: 'Estonian Premium League' },
+      { home: 'Union Saint-Gilloise', away: 'Club Brugge', league: 'Belgian Pro League' },
+      { home: 'HamKam', away: 'Fredrikstad FK', league: 'Norwegian Eliteserien' },
+      { home: 'Pumas UNAM', away: 'CF Pachuca', league: 'Liga MX' },
+      { home: 'CD Tecnico Universitario', away: 'CSD Macara', league: 'Serie A Ecuador' },
+      { home: 'RKS Radomiak Radom', away: 'Pogon Szczecin', league: 'Polish Ekstraklasa' },
+      { home: 'Ayacucho FC', away: 'Atletico Grau', league: 'Peruvian Primera Division' },
+      { home: 'NK Maribor', away: 'NK Celje', league: 'Slovenian PrvaLiga' },
+      { home: 'Club Almirante Brown', away: 'Mitre Santiago del Estero', league: 'Argentine Primera B' },
+      { home: 'CA Guemes', away: 'Gimnasia Y Tiro de Salta', league: 'Argentine Torneo Federal A' },
+      { home: 'Rapid Bucuresti 1923', away: 'FC CFR 1907 Cluj', league: 'Romanian Liga I' },
+      { home: 'CA Defensores de Belgrano', away: 'Estudiantes Rio Cuarto', league: 'Argentine Primera B' },
+      { home: 'Amazonas FC AM', away: 'Botafogo FC SP', league: 'Brazilian Serie B' },
+      { home: 'EC Vitoria BA', away: 'Red Bull Bragantino SP', league: 'Brazilian Serie A' },
+      { home: 'Vikingur Reykjavik', away: 'Valur Reykjavik', league: 'Icelandic Urvalsdeild' }
     ];
 
     return realFixtures.map((fixture, index) => ({

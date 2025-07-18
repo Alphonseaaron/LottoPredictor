@@ -6,11 +6,13 @@ This is a fully automated prediction system for SportPesa's 17-match jackpot tha
 
 ## Recent Changes
 
-- **January 18, 2025**: Implemented complete automation system with real data sources
-- Added SportPesa web scraping for live jackpot fixtures  
-- Integrated football data scraping from multiple sources (Flashscore, ESPN, BBC)
-- Built AI-powered analysis using OpenAI GPT-4o for match predictions
-- Created automated prediction service with historical pattern optimization
+- **January 18, 2025**: Migrated from Replit Agent to Replit environment  
+- Replaced OpenAI dependency with Python-based AI analyzer for predictions
+- Fixed database timestamp issues and improved fixture handling
+- Added support for custom fixture input from user-provided lists
+- Updated demo fixtures to match current SportPesa mega jackpot fixtures
+- Implemented automated prediction service with Python analysis engine
+- Created comprehensive API for fixture management and prediction generation
 - Added PostgreSQL database with Drizzle ORM for data persistence
 - Built comprehensive dashboard with automated and manual prediction tabs
 

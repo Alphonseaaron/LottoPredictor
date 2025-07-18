@@ -132,6 +132,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create jackpot with custom fixtures
+  app.post("/api/jackpot/custom", async (req, res) => {
+    try {
+      const { amount, fixtureText } = req.body;
+      
+      if (!amount || !fixtureText) {
+        return res.status(400).json({ message: "Amount and fixture text are required" });
+      }
+      
+      const { fixtureParser } = await import("./services/fixture-parser");
+      const parsedFixtures = fixtureParser.parseFixtureList(fixtureText);
+      
+      if (parsedFixtures.length === 0) {
+        return res.status(400).json({ message: "No valid fixtures found in the text" });
+      }
+      
+      // Create jackpot
+      const jackpot = await storage.createJackpot({
+        amount,
+        drawDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+        status: 'active'
+      });
+      
+      // Create fixtures
+      const fixtures = await Promise.all(
+        parsedFixtures.map((fixture, index) => 
+          storage.createFixture({
+            homeTeam: fixture.homeTeam,
+            awayTeam: fixture.awayTeam,
+            matchDate: new Date(fixture.matchDate),
+            jackpotId: jackpot.id.toString()
+          })
+        )
+      );
+      
+      res.json({
+        jackpot,
+        fixtures,
+        message: `Created jackpot with ${fixtures.length} fixtures`
+      });
+    } catch (error) {
+      console.error("Error creating custom jackpot:", error);
+      res.status(500).json({ message: "Failed to create custom jackpot" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
