@@ -74,8 +74,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         mostCommon: frequencyAnalysis.mostCommonOutcome
       });
       
-      for (let i = 0; i < fixtures.length; i++) {
-        const fixture = fixtures[i];
+      // Sort fixtures by their original order (by ID to maintain SportPesa fixture order)
+      const orderedFixtures = fixtures.sort((a, b) => a.id - b.id);
+      
+      for (let i = 0; i < orderedFixtures.length; i++) {
+        const fixture = orderedFixtures[i];
         
         console.log(`🏟️ Analyzing: ${fixture.homeTeam} vs ${fixture.awayTeam}`);
         
@@ -110,7 +113,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         predictions.push(prediction);
       }
       
-      res.json(predictions);
+      // Return predictions in original fixture order
+      const orderedPredictions = predictions.sort((a, b) => {
+        const fixtureA = orderedFixtures.find(f => f.id === a.fixtureId);
+        const fixtureB = orderedFixtures.find(f => f.id === b.fixtureId);
+        return (fixtureA?.id || 0) - (fixtureB?.id || 0);
+      });
+      
+      res.json(orderedPredictions);
     } catch (error) {
       res.status(500).json({ message: "Failed to generate predictions" });
     }
