@@ -340,7 +340,11 @@ export class SportPesaScraper {
   }
 
   private getRealisticDemoFixtures(): SportPesaFixture[] {
-    // Current realistic fixtures for demo purposes (preserving original order)
+    // NOTE: This is demo data used when SportPesa scraping fails due to CORS/rate limits
+    // In production, this should be replaced with actual SportPesa API integration
+    console.log('⚠️ Using demo fixtures - SportPesa scraping may be blocked by CORS or rate limiting');
+    console.log('💡 To get real fixtures, SportPesa would need to provide an API or allow cross-origin requests');
+    
     return [
       { homeTeam: 'Manchester City', awayTeam: 'Arsenal', matchDate: new Date().toISOString(), league: 'Premier League', gameNumber: 1 },
       { homeTeam: 'Liverpool', awayTeam: 'Chelsea', matchDate: new Date().toISOString(), league: 'Premier League', gameNumber: 2 },

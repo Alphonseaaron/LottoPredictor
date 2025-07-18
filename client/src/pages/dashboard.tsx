@@ -240,8 +240,10 @@ export default function Dashboard() {
                       <CardTitle className="text-lg font-semibold text-gray-900">Jackpot Fixtures</CardTitle>
                       <p className="text-sm text-gray-600">
                         {fixtures.length > 0 
-                          ? `Showing ${fixtures.length} SportPesa mega jackpot fixtures` 
-                          : "Loading SportPesa fixtures automatically..."
+                          ? `Showing ${fixtures.length} mega jackpot fixtures (demo data for development)` 
+                          : scrapeMutation.isPending 
+                            ? "Loading SportPesa fixtures..." 
+                            : "Click 'Load SportPesa' to fetch the latest mega jackpot fixtures"
                         }
                       </p>
                     </div>
@@ -267,51 +269,62 @@ export default function Dashboard() {
                       <Bot className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                       <h3 className="text-lg font-medium text-gray-900 mb-2">No fixtures loaded</h3>
                       <p className="text-sm text-gray-500 mb-4">
-                        Click "Load SportPesa" to automatically fetch the latest mega jackpot fixtures
+                        {scrapeMutation.isPending 
+                          ? "Fetching latest SportPesa mega jackpot fixtures..." 
+                          : "Click 'Load SportPesa' above to fetch the latest mega jackpot fixtures"
+                        }
                       </p>
-                      <Button
-                        onClick={() => scrapeMutation.mutate()}
-                        disabled={scrapeMutation.isPending}
-                        className="flex items-center space-x-2"
-                      >
-                        {scrapeMutation.isPending ? (
+                      {scrapeMutation.isPending && (
+                        <div className="flex items-center justify-center space-x-2">
                           <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Bot className="h-4 w-4" />
-                        )}
-                        <span>Load SportPesa Fixtures</span>
-                      </Button>
+                          <span className="text-sm text-gray-500">Loading from SportPesa...</span>
+                        </div>
+                      )}
                     </div>
                   ) : (
-                    <div className="space-y-3">
-                      {fixtures.map((fixture, index) => (
-                        <div key={fixture.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">
-                              {index + 1}
-                            </div>
-                            <div>
-                              <div className="font-medium text-gray-900">
-                                {fixture.homeTeam} vs {fixture.awayTeam}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {new Date(fixture.matchDate).toLocaleDateString()}
-                              </div>
-                            </div>
+                    <div className="space-y-4">
+                      {/* Development Note */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs">i</span>
                           </div>
-                          {fixture.prediction && (
-                            <div className="flex items-center space-x-2">
-                              <Badge className={getPredictionBadgeColor(fixture.prediction.prediction)}>
-                                {fixture.prediction.prediction === "1" ? "Home Win" : 
-                                 fixture.prediction.prediction === "X" ? "Draw" : "Away Win"}
-                              </Badge>
-                              <span className="text-sm text-gray-500">
-                                {fixture.prediction.confidence}%
-                              </span>
-                            </div>
-                          )}
+                          <p className="text-sm text-blue-800">
+                            <strong>Development Mode:</strong> Using demo fixtures. SportPesa scraping may be limited by CORS policy.
+                          </p>
                         </div>
-                      ))}
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {fixtures.map((fixture, index) => (
+                          <div key={fixture.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div className="flex items-center space-x-4">
+                              <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">
+                                {index + 1}
+                              </div>
+                              <div>
+                                <div className="font-medium text-gray-900">
+                                  {fixture.homeTeam} vs {fixture.awayTeam}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {new Date(fixture.matchDate).toLocaleDateString()}
+                                </div>
+                              </div>
+                            </div>
+                            {fixture.prediction && (
+                              <div className="flex items-center space-x-2">
+                                <Badge className={getPredictionBadgeColor(fixture.prediction.prediction)}>
+                                  {fixture.prediction.prediction === "1" ? "Home Win" : 
+                                   fixture.prediction.prediction === "X" ? "Draw" : "Away Win"}
+                                </Badge>
+                                <span className="text-sm text-gray-500">
+                                  {fixture.prediction.confidence}%
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                   
