@@ -1,0 +1,153 @@
+Perfect — here's a **complete Replit project prompt** to build your **automated jackpot prediction tool** using:
+
+* Frontend: `HTML + Tailwind CSS`
+* Backend: `Firebase (Firestore)`
+* Prediction logic: Script connected to scraped data (initially mocked — scraping can be added in phase 2)
+
+---
+
+## 🧠 Project Name:
+
+**AutoJackpot Predictor – SportPesa Edition**
+
+---
+
+## 💡 Replit Prompt (for project creation)
+
+```
+Create a web app using HTML, Tailwind CSS, and Firebase as backend.
+
+**Project goal:** Build an automated prediction tool for SportPesa's 17-match jackpot.
+
+**Features:**
+
+1. **Dashboard UI** (Tailwind CSS):
+   - Header: “AutoJackpot Predictor”
+   - Section to display upcoming 17 jackpot matches (fetched or pasted)
+   - Button: “Generate Predictions”
+   - Output area for suggested results (1X2 per match)
+   - Option to export predictions as CSV
+
+2. **Firebase Backend**:
+   - Store jackpot fixtures (current & past)
+   - Store predictions per user/session
+   - Allow user accounts (optional in phase 2)
+
+3. **Core Logic (JS or serverless function)**:
+   - Pull team form, stats, and H2H (start with mock data, allow later scraping)
+   - Combine frequency logic (e.g., most jackpots have 5 draws) with team stats
+   - Output balanced bet lines (e.g., 5–6–6 or 6–5–6)
+
+4. **Bonus Features** (add in future versions):
+   - Auto scrape SportPesa jackpot page (via server function or Puppeteer)
+   - Auto match team names to Flashscore, Sofascore, or WhoScored
+   - Allow wildcard risk pick toggling
+   - Firebase Auth (login & save predictions per user)
+
+This tool will help users:
+- View upcoming jackpots
+- Auto-generate smart predictions using football data
+- Export lines for betting
+
+```
+
+---
+
+## 📁 Suggested File Structure in Replit
+
+```
+📁 /public
+   └─ index.html
+📁 /styles
+   └─ tailwind.css
+📁 /scripts
+   └─ predict.js
+📁 /data
+   └─ mock-fixtures.json  ← (start with this)
+📁 /firebase
+   └─ firebase-config.js
+📁 /functions
+   └─ generatePrediction.js
+📄 tailwind.config.js
+📄 replit.nix
+```
+
+---
+
+## 🔥 Firebase Setup Steps
+
+1. Go to [Firebase Console](https://console.firebase.google.com)
+2. Create a new project (e.g., `jackpot-predictor`)
+3. Add a web app
+4. Enable Firestore Database
+5. Enable Authentication (if you want login later)
+6. Copy and paste config into `firebase-config.js` like:
+
+```js
+// /firebase/firebase-config.js
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+
+const firebaseConfig = {
+  apiKey: "YOUR-API-KEY",
+  authDomain: "YOUR.firebaseapp.com",
+  projectId: "YOUR-ID",
+  storageBucket: "YOUR.appspot.com",
+  messagingSenderId: "...",
+  appId: "...",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+export { db };
+```
+
+---
+
+## 🔮 Prediction Logic: `/functions/generatePrediction.js`
+
+Mock version for now:
+
+```js
+export function generatePrediction(fixtures) {
+  return fixtures.map(fixture => {
+    const rnd = Math.random();
+    let prediction = "1";
+    if (rnd < 0.33) prediction = "1";
+    else if (rnd < 0.66) prediction = "X";
+    else prediction = "2";
+
+    return {
+      ...fixture,
+      prediction
+    };
+  });
+}
+```
+
+---
+
+## 🧪 Sample Fixture Format (`mock-fixtures.json`)
+
+```json
+[
+  { "match": "Arsenal vs Chelsea", "date": "2025-07-20" },
+  { "match": "Barcelona vs Sevilla", "date": "2025-07-20" },
+  ...
+]
+```
+
+---
+
+## ✅ What to Build First
+
+1. [ ] Tailwind HTML layout
+2. [ ] Input field or upload for 17 matches
+3. [ ] Button to generate predictions
+4. [ ] Display results in grid (match + 1X2)
+5. [ ] Firebase integration (save predictions)
+6. [ ] Add scraping in next phase (optional)
+
+---
+
+Would you like me to generate the starter code (`index.html`, `tailwind`, and mock prediction logic) for you now?
