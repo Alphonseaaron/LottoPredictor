@@ -139,15 +139,18 @@ export class MemStorage implements IStorage {
 // Database storage implementation using Drizzle ORM
 export class DatabaseStorage implements IStorage {
   async createFixture(fixture: InsertFixture): Promise<Fixture> {
+    if (!db) throw new Error("Database not initialized");
     const [created] = await db.insert(fixtures).values(fixture).returning();
     return created;
   }
 
   async getFixturesByJackpotId(jackpotId: string): Promise<Fixture[]> {
+    if (!db) throw new Error("Database not initialized");
     return await db.select().from(fixtures).where(eq(fixtures.jackpotId, jackpotId));
   }
 
   async getFixturesWithPredictions(jackpotId: string): Promise<FixtureWithPrediction[]> {
+    if (!db) throw new Error("Database not initialized");
     const fixtureList = await this.getFixturesByJackpotId(jackpotId);
     
     const result: FixtureWithPrediction[] = [];
@@ -160,6 +163,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPrediction(prediction: InsertPrediction): Promise<Prediction> {
+    if (!db) throw new Error("Database not initialized");
     const [created] = await db.insert(predictions).values({
       ...prediction,
       strategy: prediction.strategy || "balanced"
@@ -168,10 +172,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getPredictionsByFixtureId(fixtureId: number): Promise<Prediction[]> {
+    if (!db) throw new Error("Database not initialized");
     return await db.select().from(predictions).where(eq(predictions.fixtureId, fixtureId));
   }
 
   async deletePredictionsByJackpotId(jackpotId: string): Promise<void> {
+    if (!db) throw new Error("Database not initialized");
     const fixtureList = await this.getFixturesByJackpotId(jackpotId);
     const fixtureIds = fixtureList.map(f => f.id);
     
@@ -181,6 +187,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createJackpot(jackpot: InsertJackpot): Promise<Jackpot> {
+    if (!db) throw new Error("Database not initialized");
     const [created] = await db.insert(jackpots).values({
       ...jackpot,
       status: jackpot.status || "active"
@@ -189,11 +196,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCurrentJackpot(): Promise<Jackpot | undefined> {
+    if (!db) throw new Error("Database not initialized");
     const [current] = await db.select().from(jackpots).where(eq(jackpots.status, "active")).limit(1);
     return current;
   }
 
   async updateJackpot(id: number, updates: Partial<Jackpot>): Promise<Jackpot> {
+    if (!db) throw new Error("Database not initialized");
     const [updated] = await db.update(jackpots).set(updates).where(eq(jackpots.id, id)).returning();
     return updated;
   }
