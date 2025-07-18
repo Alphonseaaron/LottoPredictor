@@ -134,23 +134,26 @@ export default function Dashboard() {
     }
   });
 
-  // Clear predictions
-  const clearPredictions = async () => {
-    if (!jackpot) return;
-    
-    try {
-      await apiRequest("DELETE", `/api/predictions/jackpot/${jackpot.id}`);
+  // Delete predictions mutation
+  const deletePredictionsMutation = useMutation({
+    mutationFn: async () => {
+      if (!jackpot) throw new Error("No jackpot available");
+      
+      return await apiRequest("DELETE", `/api/predictions/jackpot/${jackpot.id}`);
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/fixtures"] });
       queryClient.invalidateQueries({ queryKey: ["/api/predictions/summary"] });
-      toast({ title: "Predictions cleared" });
-    } catch (error: any) {
+      toast({ title: "Predictions cleared successfully!" });
+    },
+    onError: (error: any) => {
       toast({ 
         title: "Failed to clear predictions", 
         description: error.message,
         variant: "destructive" 
       });
     }
-  };
+  });
 
   const handleExportCsv = () => {
     if (fixtures.length === 0) {
@@ -308,12 +311,9 @@ export default function Dashboard() {
                                 {fixture.homeTeam} vs {fixture.awayTeam}
                               </div>
                             </div>
-                            {fixture.prediction && (
-                              <Badge className={getPredictionBadgeColor(fixture.prediction.prediction)}>
-                                {fixture.prediction.prediction === "1" ? "1" : 
-                                 fixture.prediction.prediction === "X" ? "X" : "2"}
-                              </Badge>
-                            )}
+                            <div className="text-sm text-gray-500">
+                              {new Date(fixture.matchDate).toLocaleDateString()}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -484,6 +484,18 @@ export default function Dashboard() {
                   <p className="text-sm text-gray-600">AI-optimized selections for maximum jackpot potential</p>
                 </div>
                 <div className="flex space-x-3">
+                  <Button 
+                    variant="destructive"
+                    onClick={() => deletePredictionsMutation.mutate()}
+                    disabled={deletePredictionsMutation.isPending}
+                  >
+                    {deletePredictionsMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-4 w-4 mr-2" />
+                    )}
+                    Clear Predictions
+                  </Button>
                   <Button 
                     variant="default"
                     onClick={handleExportCsv}

@@ -179,6 +179,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete predictions for a jackpot
+  app.delete("/api/predictions/jackpot/:jackpotId", async (req, res) => {
+    try {
+      const { jackpotId } = req.params;
+      await storage.deletePredictionsByJackpotId(jackpotId);
+      res.json({ message: "Predictions deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete predictions" });
+    }
+  });
+
+  // Delete predictions for a jackpot
+  app.delete("/api/predictions/jackpot/:jackpotId", async (req, res) => {
+    try {
+      const { jackpotId } = req.params;
+      await storage.deletePredictionsByJackpotId(jackpotId);
+      res.json({ message: "Predictions deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete predictions" });
+    }
+  });
+
   // Automated prediction generation
   app.post("/api/predictions/automated", async (req, res) => {
     try {

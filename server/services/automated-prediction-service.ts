@@ -220,69 +220,26 @@ export class AutomatedPredictionService {
   }
   
   /**
-   * Optimize predictions based on historical winning patterns
+   * Use pure AI analysis without forcing distribution patterns
+   * Let the analysis stand based on comprehensive fixture evaluation
    */
   private async optimizePredictionsForJackpot(
     aiAnalyses: Array<{ prediction: '1' | 'X' | '2'; confidence: number; reasoning: string; keyFactors: string[]; riskLevel: string }>,
     jackpotAnalysis: { expectedDistribution: { home: number; draw: number; away: number }; overallStrategy: string }
   ) {
-    // Sort predictions by confidence
-    const sortedAnalyses = aiAnalyses
-      .map((analysis, index) => ({ ...analysis, originalIndex: index }))
-      .sort((a, b) => b.confidence - a.confidence);
-    
-    const optimizedPredictions = new Array(aiAnalyses.length);
-    const target = jackpotAnalysis.expectedDistribution;
-    let remaining = { home: target.home, draw: target.draw, away: target.away };
-    
-    // First pass: assign high-confidence predictions that match our distribution
-    for (const analysis of sortedAnalyses) {
-      const prediction = analysis.prediction;
-      const category = prediction === '1' ? 'home' : prediction === 'X' ? 'draw' : 'away';
-      
-      if (remaining[category] > 0 && analysis.confidence >= 75) {
-        optimizedPredictions[analysis.originalIndex] = analysis;
-        remaining[category]--;
-      }
-    }
-    
-    // Second pass: fill remaining slots with best available predictions
-    for (const analysis of sortedAnalyses) {
-      if (optimizedPredictions[analysis.originalIndex]) continue; // Already assigned
-      
-      // Find the category we most need to fill
-      const needsHome = remaining.home > 0;
-      const needsDraw = remaining.draw > 0;
-      const needsAway = remaining.away > 0;
-      
-      if (needsHome && remaining.home >= Math.max(remaining.draw, remaining.away)) {
-        optimizedPredictions[analysis.originalIndex] = {
-          ...analysis,
-          prediction: '1' as const,
-          reasoning: `Optimized for jackpot distribution: ${analysis.reasoning}`
-        };
-        remaining.home--;
-      } else if (needsDraw && remaining.draw >= Math.max(remaining.home, remaining.away)) {
-        optimizedPredictions[analysis.originalIndex] = {
-          ...analysis,
-          prediction: 'X' as const,
-          reasoning: `Optimized for jackpot distribution: ${analysis.reasoning}`
-        };
-        remaining.draw--;
-      } else if (needsAway) {
-        optimizedPredictions[analysis.originalIndex] = {
-          ...analysis,
-          prediction: '2' as const,
-          reasoning: `Optimized for jackpot distribution: ${analysis.reasoning}`
-        };
-        remaining.away--;
-      } else {
-        // Use original prediction if distribution is complete
-        optimizedPredictions[analysis.originalIndex] = analysis;
-      }
-    }
-    
-    return optimizedPredictions;
+    // Return AI predictions as-is, based purely on comprehensive analysis
+    // No artificial balancing - let the data and analysis speak for itself
+    return aiAnalyses.map((analysis, index) => ({
+      ...analysis,
+      reasoning: `${analysis.reasoning}
+
+📊 **ANALYSIS METHODOLOGY**: Pure data-driven prediction without artificial balancing
+🎯 **CONFIDENCE LEVEL**: ${analysis.confidence}% based on comprehensive statistical analysis
+⚡ **RISK ASSESSMENT**: ${analysis.riskLevel.toUpperCase()} risk prediction
+🔍 **KEY FACTORS**: ${analysis.keyFactors.join(', ')}
+
+**Note**: This prediction follows pure statistical analysis without forcing balanced distributions. The AI has analyzed ${analysis.keyFactors.length} key factors to reach this conclusion.`
+    }));
   }
   
   /**

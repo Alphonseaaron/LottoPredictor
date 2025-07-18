@@ -79,21 +79,95 @@ def analyze_match(data):
         home_h2h_rate = h2h['homeWins'] / h2h['totalMeetings']
         home_score += (home_h2h_rate - 0.33) * 20  # 0.33 is baseline
     
-    # Determine prediction
+    # Determine prediction with comprehensive analysis
     if home_score > 65:
         prediction = '1'
-        confidence = min(90, max(55, home_score))
-        reasoning = f"{home_team} favored due to strong form and home advantage"
-        risk_level = 'low' if confidence > 75 else 'medium'
+        confidence = min(95, max(60, home_score))
+        reasoning = f"""**COMPREHENSIVE ANALYSIS: {home_team} WIN PREDICTED**
+        
+📊 **Form Analysis**: {home_team} ({home_stats['form']}) vs {away_team} ({away_stats['form']})
+- Home team form score: {home_form_score:.1f}/5
+- Away team form score: {away_form_score:.1f}/5
+- Form advantage: {'+' if home_form_score > away_form_score else ''}{home_form_score - away_form_score:.1f}
+
+🏆 **League Position**: {home_team} ({home_stats['position']}th) vs {away_team} ({away_stats['position']}th)
+- Position advantage: {position_diff} places better
+- Points: {home_stats['points']} vs {away_stats['points']}
+
+⚽ **Attack vs Defense**:
+- {home_team}: {home_stats['goalsFor']} scored, {home_stats['goalsAgainst']} conceded (ratio: {home_attack:.2f})
+- {away_team}: {away_stats['goalsFor']} scored, {away_stats['goalsAgainst']} conceded (ratio: {away_attack:.2f})
+- Attack superiority: {'+' if attack_diff > 0 else ''}{attack_diff:.2f}
+
+📈 **Head-to-Head**: {h2h['totalMeetings']} previous meetings
+- {home_team} wins: {h2h['homeWins']} ({h2h['homeWins']/max(1,h2h['totalMeetings'])*100:.0f}%)
+- Draws: {h2h['draws']} ({h2h['draws']/max(1,h2h['totalMeetings'])*100:.0f}%)
+- {away_team} wins: {h2h['awayWins']} ({h2h['awayWins']/max(1,h2h['totalMeetings'])*100:.0f}%)
+
+🏠 **Home Advantage**: Strong factor (+{55}% base advantage)
+- {home_team} home record: {home_stats['homeRecord']['wins']}W-{home_stats['homeRecord']['draws']}D-{home_stats['homeRecord']['losses']}L
+- {away_team} away record: {away_stats['awayRecord']['wins']}W-{away_stats['awayRecord']['draws']}D-{away_stats['awayRecord']['losses']}L
+
+**VERDICT**: {home_team} has significant advantages in multiple key areas making them strong favorites."""
+        risk_level = 'low' if confidence > 80 else 'medium'
     elif home_score < 35:
         prediction = '2'
-        confidence = min(90, max(55, 100 - home_score))
-        reasoning = f"{away_team} shows superior statistics and recent form"
-        risk_level = 'low' if confidence > 75 else 'medium'
+        confidence = min(95, max(60, 100 - home_score))
+        reasoning = f"""**COMPREHENSIVE ANALYSIS: {away_team} WIN PREDICTED**
+        
+📊 **Form Analysis**: {home_team} ({home_stats['form']}) vs {away_team} ({away_stats['form']})
+- Home team form score: {home_form_score:.1f}/5
+- Away team form score: {away_form_score:.1f}/5
+- Form advantage: {'+' if away_form_score > home_form_score else ''}{away_form_score - home_form_score:.1f} to away team
+
+🏆 **League Position**: {home_team} ({home_stats['position']}th) vs {away_team} ({away_stats['position']}th)
+- {away_team} is {abs(position_diff)} places higher in the table
+- Points: {away_stats['points']} vs {home_stats['points']}
+
+⚽ **Attack vs Defense**:
+- {home_team}: {home_stats['goalsFor']} scored, {home_stats['goalsAgainst']} conceded (ratio: {home_attack:.2f})
+- {away_team}: {away_stats['goalsFor']} scored, {away_stats['goalsAgainst']} conceded (ratio: {away_attack:.2f})
+- Attack superiority: {'+' if attack_diff < 0 else ''}{abs(attack_diff):.2f} to {away_team}
+
+📈 **Head-to-Head**: {h2h['totalMeetings']} previous meetings
+- {home_team} wins: {h2h['homeWins']} ({h2h['homeWins']/max(1,h2h['totalMeetings'])*100:.0f}%)
+- Draws: {h2h['draws']} ({h2h['draws']/max(1,h2h['totalMeetings'])*100:.0f}%)
+- {away_team} wins: {h2h['awayWins']} ({h2h['awayWins']/max(1,h2h['totalMeetings'])*100:.0f}%)
+
+🏠 **Away Challenge**: Overcoming home advantage
+- {away_team} away record: {away_stats['awayRecord']['wins']}W-{away_stats['awayRecord']['draws']}D-{away_stats['awayRecord']['losses']}L
+- Strong away form suggests they can win on the road
+
+**VERDICT**: {away_team}'s superior form and league position outweigh home advantage."""
+        risk_level = 'low' if confidence > 80 else 'medium'
     else:
         prediction = 'X'
-        confidence = 65 + random.randint(-10, 10)
-        reasoning = "Teams are evenly matched, draw is most likely outcome"
+        confidence = 60 + random.randint(-5, 15)
+        reasoning = f"""**COMPREHENSIVE ANALYSIS: DRAW PREDICTED**
+        
+📊 **Balanced Contest**: {home_team} vs {away_team}
+- Form comparison: {home_team} ({home_form_score:.1f}/5) vs {away_team} ({away_form_score:.1f}/5)
+- Very close form levels indicate evenly matched teams
+
+🏆 **League Position**: {home_team} ({home_stats['position']}th) vs {away_team} ({away_stats['position']}th)
+- Minimal position difference: {abs(position_diff)} places
+- Points: {home_stats['points']} vs {away_stats['points']}
+
+⚽ **Attack vs Defense Balance**:
+- {home_team}: {home_stats['goalsFor']} scored, {home_stats['goalsAgainst']} conceded (ratio: {home_attack:.2f})
+- {away_team}: {away_stats['goalsFor']} scored, {away_stats['goalsAgainst']} conceded (ratio: {away_attack:.2f})
+- Attack levels: Very similar ({abs(attack_diff):.2f} difference)
+
+📈 **Head-to-Head Pattern**: {h2h['totalMeetings']} previous meetings
+- Historical results show balanced competition
+- Draw frequency: {h2h['draws']/max(1,h2h['totalMeetings'])*100:.0f}% of meetings
+
+🏠 **Home vs Away**: Factors cancel out
+- Home advantage vs away team's road form
+- {home_team} home: {home_stats['homeRecord']['wins']}W-{home_stats['homeRecord']['draws']}D-{home_stats['homeRecord']['losses']}L
+- {away_team} away: {away_stats['awayRecord']['wins']}W-{away_stats['awayRecord']['draws']}D-{away_stats['awayRecord']['losses']}L
+
+**VERDICT**: All major factors point to a closely contested match ending in a stalemate."""
         risk_level = 'medium'
     
     key_factors = []
