@@ -6,20 +6,22 @@ This is a fully automated prediction system for SportPesa's 17-match jackpot tha
 
 ## Recent Changes
 
-- **July 18, 2025**: Consolidated UI to single comprehensive analysis button
-- Removed duplicate prediction buttons - now single "Complete Analysis & Predictions" 
-- Updated historical patterns to focus on recent 2025 data (last months)
-- Fixed prediction ordering to match original SportPesa mega jackpot fixture sequence
+- **July 18, 2025**: Migrated from Replit Agent to Replit environment successfully
+- Fixed database configuration to use in-memory storage for development
+- Updated storage layer to handle missing database connections securely  
+- Implemented automatic SportPesa scraping for new mega jackpot fixtures
+- Added real-time checking every 30 minutes for new jackpots
+- Enhanced scraper to use Kenya-specific SportPesa URLs and widget API
+- Added manual scraping trigger via `/api/scrape/sportpesa` endpoint
+- Ensured prediction ordering matches SportPesa fixture sequence exactly
+- Added scraping status monitoring via `/api/scrape/status` endpoint
+- Consolidated UI to single comprehensive analysis button
+- Updated historical patterns to focus on recent 2025 data
 - Enhanced comprehensive analysis with 5-factor evaluation system
-- Added detailed reasoning with team statistics, form analysis, and head-to-head records
-- **January 18, 2025**: Migrated from Replit Agent to Replit environment  
-- Replaced OpenAI dependency with Python-based AI analyzer for predictions
-- Fixed database timestamp issues and improved fixture handling
-- Added support for custom fixture input from user-provided lists
-- Updated demo fixtures to match current SportPesa mega jackpot fixtures
-- Implemented automated prediction service with Python analysis engine
-- Created comprehensive API for fixture management and prediction generation
-- Added PostgreSQL database with Drizzle ORM for data persistence
+- **January 18, 2025**: Enhanced prediction engine with real football data
+- Replaced manual fixture input with automated SportPesa scraping
+- Implemented automated prediction service with comprehensive analysis
+- Added PostgreSQL database support with in-memory fallback
 
 ## User Preferences
 

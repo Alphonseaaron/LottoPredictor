@@ -18,6 +18,75 @@ export interface AutomatedPredictionResult {
 }
 
 export class AutomatedPredictionService {
+  private isRunning: boolean = false;
+  private lastJackpotId: string | null = null;
+
+  /**
+   * Setup automatic scraping and prediction generation
+   */
+  setupAutomatedSchedule(): void {
+    console.log('🤖 Setting up automated SportPesa scraping...');
+    
+    // Check for new jackpots every 30 minutes
+    setInterval(async () => {
+      await this.checkForNewJackpot();
+    }, 30 * 60 * 1000); // 30 minutes
+    
+    // Initial check
+    setTimeout(() => this.checkForNewJackpot(), 5000); // 5 seconds delay
+  }
+
+  /**
+   * Check for new jackpot and generate predictions if found
+   */
+  async checkForNewJackpot(): Promise<void> {
+    if (this.isRunning) {
+      console.log('⏳ Automated process already running, skipping...');
+      return;
+    }
+
+    try {
+      this.isRunning = true;
+      console.log('🔍 Checking for new SportPesa mega jackpot...');
+      
+      const jackpotData = await sportpesaScraper.getCurrentJackpot();
+      
+      if (!jackpotData) {
+        console.log('⚠️ No jackpot data found');
+        return;
+      }
+
+      // Check if this is a new jackpot
+      const currentJackpotId = this.generateJackpotId(jackpotData);
+      
+      if (this.lastJackpotId === currentJackpotId) {
+        console.log(`✅ Jackpot ${currentJackpotId} already processed`);
+        return;
+      }
+
+      console.log(`🆕 New jackpot detected: ${currentJackpotId}`);
+      console.log(`💰 Amount: ${jackpotData.amount}`);
+      console.log(`⚽ Fixtures: ${jackpotData.fixtures.length}`);
+      
+      // Generate automated predictions for new jackpot
+      await this.generateAutomatedPredictions();
+      
+      this.lastJackpotId = currentJackpotId;
+      console.log('✅ Automated predictions completed successfully');
+      
+    } catch (error) {
+      console.error('❌ Error in automated jackpot check:', error);
+    } finally {
+      this.isRunning = false;
+    }
+  }
+
+  /**
+   * Generate unique ID for jackpot based on amount and fixture count
+   */
+  private generateJackpotId(jackpotData: any): string {
+    return `${jackpotData.amount}_${jackpotData.fixtures.length}_${jackpotData.drawDate}`;
+  }
   
   /**
    * Main automated prediction pipeline

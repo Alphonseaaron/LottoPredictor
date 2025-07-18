@@ -10,8 +10,8 @@ async function startServer() {
 
   const server = await registerRoutes(app);
 
-  // Automated predictions disabled - will be triggered manually via API
-  // automatedPredictionService.setupAutomatedSchedule();
+  // Enable automated predictions for SportPesa scraping
+  automatedPredictionService.setupAutomatedSchedule();
 
   // Use Vite's middleware for development or serve static files for production
   if (process.env.NODE_ENV === "development") {

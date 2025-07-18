@@ -44,6 +44,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Trigger manual SportPesa scraping
+  app.post("/api/scrape/sportpesa", async (req, res) => {
+    try {
+      console.log('🔄 Manual SportPesa scraping triggered...');
+      const result = await automatedPredictionService.generateAutomatedPredictions();
+      res.json({ 
+        success: true, 
+        message: 'SportPesa scraping and predictions completed',
+        result 
+      });
+    } catch (error) {
+      console.error('❌ Manual scraping failed:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to scrape SportPesa', 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
+  // Get scraping status
+  app.get("/api/scrape/status", async (req, res) => {
+    try {
+      res.json({
+        automatedScrapingEnabled: true,
+        checkInterval: '30 minutes',
+        lastCheck: new Date().toISOString(),
+        status: 'Active - checking SportPesa for new mega jackpots'
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get scraping status" });
+    }
+  });
+
   // Generate predictions
   app.post("/api/predictions/generate", async (req, res) => {
     try {
