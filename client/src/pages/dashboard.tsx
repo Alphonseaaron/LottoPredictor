@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { exportToCsv } from "@/lib/csv-export";
-import AutomatedPredictor from "@/components/automated-predictor";
+// Removed AutomatedPredictor - consolidated into single comprehensive analysis
 import type { FixtureWithPrediction, PredictionSummary, Jackpot } from "@shared/schema";
 import { 
   ChartLine, 
@@ -203,100 +203,83 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content Section */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Tabs for different input methods */}
-            <Tabs defaultValue="automated" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="automated" className="flex items-center space-x-2">
-                  <Bot className="h-4 w-4" />
-                  <span>Fully Automated</span>
-                </TabsTrigger>
-                <TabsTrigger value="manual" className="flex items-center space-x-2">
-                  <Keyboard className="h-4 w-4" />
-                  <span>Manual Entry</span>
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="automated" className="space-y-6">
-                <AutomatedPredictor />
-              </TabsContent>
-              
-              <TabsContent value="manual" className="space-y-6">
-                <Card>
-                  <CardHeader className="border-b border-gray-200">
-                    <CardTitle className="text-lg font-semibold text-gray-900">Jackpot Fixtures</CardTitle>
-                    <p className="text-sm text-gray-600">Import fixtures manually or load from CSV</p>
-                  </CardHeader>
-                  <CardContent className="p-6 space-y-4">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Import from CSV
-                        </label>
-                        <Textarea
-                          placeholder="Paste CSV data here (format: Home Team, Away Team, Date)..."
-                          value={csvInput}
-                          onChange={(e) => setCsvInput(e.target.value)}
-                          rows={6}
-                          className="w-full"
-                        />
-                      </div>
+            {/* Fixture Management Section */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader className="border-b border-gray-200">
+                  <CardTitle className="text-lg font-semibold text-gray-900">Jackpot Fixtures</CardTitle>
+                  <p className="text-sm text-gray-600">Import fixtures manually or load from CSV</p>
+                </CardHeader>
+                <CardContent className="p-6 space-y-4">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Import from CSV
+                      </label>
+                      <Textarea
+                        placeholder="Paste CSV data here (format: Home Team, Away Team, Date)..."
+                        value={csvInput}
+                        onChange={(e) => setCsvInput(e.target.value)}
+                        rows={6}
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    <div className="flex space-x-3">
+                      <Button 
+                        onClick={() => importCsvMutation.mutate()}
+                        disabled={!csvInput.trim() || importCsvMutation.isPending}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        {importCsvMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <Upload className="h-4 w-4 mr-2" />
+                        )}
+                        Import Fixtures
+                      </Button>
                       
-                      <div className="flex space-x-3">
-                        <Button 
-                          onClick={() => importCsvMutation.mutate()}
-                          disabled={!csvInput.trim() || importCsvMutation.isPending}
-                          className="bg-blue-600 hover:bg-blue-700"
-                        >
-                          {importCsvMutation.isPending ? (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          ) : (
-                            <Upload className="h-4 w-4 mr-2" />
-                          )}
-                          Import Fixtures
-                        </Button>
-                        
-                        <Button 
-                          variant="outline"
-                          onClick={clearPredictions}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Clear All
-                        </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={clearPredictions}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Clear All
+                      </Button>
+                    </div>
+                  </div>
+
+                  {fixtures.length > 0 && (
+                    <div className="mt-6">
+                      <h4 className="font-medium text-gray-900 mb-3">Loaded Fixtures ({fixtures.length})</h4>
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {fixtures.slice(0, 3).map((fixture, index) => (
+                          <div key={fixture.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div>
+                              <p className="font-medium text-sm">{fixture.homeTeam} vs {fixture.awayTeam}</p>
+                              <p className="text-xs text-gray-500">
+                                {new Date(fixture.matchDate).toLocaleDateString()} • {
+                                  fixture.prediction ? `Predicted: ${fixture.prediction.prediction}` : "No prediction"
+                                }
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                              <span className="text-sm text-gray-600">Ready</span>
+                            </div>
+                          </div>
+                        ))}
+                        {fixtures.length > 3 && (
+                          <div className="text-center py-4">
+                            <p className="text-sm text-gray-500">+ {fixtures.length - 3} more matches loaded</p>
+                          </div>
+                        )}
                       </div>
                     </div>
-
-                    {fixtures.length > 0 && (
-                      <div className="mt-6">
-                        <h4 className="font-medium text-gray-900 mb-3">Loaded Fixtures ({fixtures.length})</h4>
-                        <div className="space-y-2 max-h-48 overflow-y-auto">
-                          {fixtures.slice(0, 3).map((fixture, index) => (
-                            <div key={fixture.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                              <div>
-                                <p className="font-medium text-sm">{fixture.homeTeam} vs {fixture.awayTeam}</p>
-                                <p className="text-xs text-gray-500">
-                                  {new Date(fixture.matchDate).toLocaleDateString()} • {
-                                    fixture.prediction ? `Predicted: ${fixture.prediction.prediction}` : "No prediction"
-                                  }
-                                </p>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                                <span className="text-sm text-gray-600">Ready</span>
-                              </div>
-                            </div>
-                          ))}
-                          {fixtures.length > 3 && (
-                            <div className="text-center py-4">
-                              <p className="text-sm text-gray-500">+ {fixtures.length - 3} more matches loaded</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
           {/* Prediction Panel */}

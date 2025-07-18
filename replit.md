@@ -6,6 +6,12 @@ This is a fully automated prediction system for SportPesa's 17-match jackpot tha
 
 ## Recent Changes
 
+- **July 18, 2025**: Consolidated UI to single comprehensive analysis button
+- Removed duplicate prediction buttons - now single "Complete Analysis & Predictions" 
+- Updated historical patterns to focus on recent 2025 data (last months)
+- Fixed prediction ordering to match original SportPesa mega jackpot fixture sequence
+- Enhanced comprehensive analysis with 5-factor evaluation system
+- Added detailed reasoning with team statistics, form analysis, and head-to-head records
 - **January 18, 2025**: Migrated from Replit Agent to Replit environment  
 - Replaced OpenAI dependency with Python-based AI analyzer for predictions
 - Fixed database timestamp issues and improved fixture handling
@@ -14,7 +20,6 @@ This is a fully automated prediction system for SportPesa's 17-match jackpot tha
 - Implemented automated prediction service with Python analysis engine
 - Created comprehensive API for fixture management and prediction generation
 - Added PostgreSQL database with Drizzle ORM for data persistence
-- Built comprehensive dashboard with automated and manual prediction tabs
 
 ## User Preferences
 
