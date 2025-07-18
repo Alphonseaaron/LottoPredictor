@@ -1,4 +1,6 @@
 import { fixtures, predictions, jackpots, type Fixture, type InsertFixture, type Prediction, type InsertPrediction, type Jackpot, type InsertJackpot, type FixtureWithPrediction } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Fixtures
@@ -71,8 +73,12 @@ export class MemStorage implements IStorage {
   async createPrediction(insertPrediction: InsertPrediction): Promise<Prediction> {
     const id = this.currentPredictionId++;
     const prediction: Prediction = {
-      ...insertPrediction,
       id,
+      fixtureId: insertPrediction.fixtureId,
+      prediction: insertPrediction.prediction,
+      confidence: insertPrediction.confidence,
+      reasoning: insertPrediction.reasoning || null,
+      strategy: insertPrediction.strategy || "balanced",
       createdAt: new Date()
     };
     this.predictions.set(id, prediction);
@@ -89,18 +95,23 @@ export class MemStorage implements IStorage {
     const fixtures = await this.getFixturesByJackpotId(jackpotId);
     const fixtureIds = fixtures.map(f => f.id);
     
-    for (const [id, prediction] of this.predictions) {
+    const entriesToDelete: number[] = [];
+    this.predictions.forEach((prediction, id) => {
       if (fixtureIds.includes(prediction.fixtureId)) {
-        this.predictions.delete(id);
+        entriesToDelete.push(id);
       }
-    }
+    });
+    
+    entriesToDelete.forEach(id => this.predictions.delete(id));
   }
 
   async createJackpot(insertJackpot: InsertJackpot): Promise<Jackpot> {
     const id = this.currentJackpotId++;
     const jackpot: Jackpot = {
-      ...insertJackpot,
       id,
+      amount: insertJackpot.amount,
+      drawDate: insertJackpot.drawDate,
+      status: insertJackpot.status || "active",
       createdAt: new Date()
     };
     this.jackpots.set(id, jackpot);
@@ -125,4 +136,68 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Database storage implementation using Drizzle ORM
+export class DatabaseStorage implements IStorage {
+  async createFixture(fixture: InsertFixture): Promise<Fixture> {
+    const [created] = await db.insert(fixtures).values(fixture).returning();
+    return created;
+  }
+
+  async getFixturesByJackpotId(jackpotId: string): Promise<Fixture[]> {
+    return await db.select().from(fixtures).where(eq(fixtures.jackpotId, jackpotId));
+  }
+
+  async getFixturesWithPredictions(jackpotId: string): Promise<FixtureWithPrediction[]> {
+    const fixtureList = await this.getFixturesByJackpotId(jackpotId);
+    
+    const result: FixtureWithPrediction[] = [];
+    for (const fixture of fixtureList) {
+      const [prediction] = await db.select().from(predictions).where(eq(predictions.fixtureId, fixture.id));
+      result.push({ ...fixture, prediction });
+    }
+    
+    return result;
+  }
+
+  async createPrediction(prediction: InsertPrediction): Promise<Prediction> {
+    const [created] = await db.insert(predictions).values({
+      ...prediction,
+      strategy: prediction.strategy || "balanced"
+    }).returning();
+    return created;
+  }
+
+  async getPredictionsByFixtureId(fixtureId: number): Promise<Prediction[]> {
+    return await db.select().from(predictions).where(eq(predictions.fixtureId, fixtureId));
+  }
+
+  async deletePredictionsByJackpotId(jackpotId: string): Promise<void> {
+    const fixtureList = await this.getFixturesByJackpotId(jackpotId);
+    const fixtureIds = fixtureList.map(f => f.id);
+    
+    for (const fixtureId of fixtureIds) {
+      await db.delete(predictions).where(eq(predictions.fixtureId, fixtureId));
+    }
+  }
+
+  async createJackpot(jackpot: InsertJackpot): Promise<Jackpot> {
+    const [created] = await db.insert(jackpots).values({
+      ...jackpot,
+      status: jackpot.status || "active"
+    }).returning();
+    return created;
+  }
+
+  async getCurrentJackpot(): Promise<Jackpot | undefined> {
+    const [current] = await db.select().from(jackpots).where(eq(jackpots.status, "active")).limit(1);
+    return current;
+  }
+
+  async updateJackpot(id: number, updates: Partial<Jackpot>): Promise<Jackpot> {
+    const [updated] = await db.update(jackpots).set(updates).where(eq(jackpots.id, id)).returning();
+    return updated;
+  }
+}
+
+// Use database storage in production, memory storage for development fallback
+export const storage = process.env.DATABASE_URL ? new DatabaseStorage() : new MemStorage();

@@ -2,7 +2,17 @@
 
 ## Overview
 
-This is a full-stack web application built to automate jackpot predictions for SportPesa's 17-match jackpot. The application provides an intelligent prediction system that combines football data analysis with proven statistical strategies to generate optimal betting combinations.
+This is a fully automated prediction system for SportPesa's 17-match jackpot that fetches real data from multiple sources. The application automatically scrapes SportPesa fixtures, analyzes real team statistics, applies AI-powered predictions using OpenAI, and optimizes selections based on historical winning patterns.
+
+## Recent Changes
+
+- **January 18, 2025**: Implemented complete automation system with real data sources
+- Added SportPesa web scraping for live jackpot fixtures  
+- Integrated football data scraping from multiple sources (Flashscore, ESPN, BBC)
+- Built AI-powered analysis using OpenAI GPT-4o for match predictions
+- Created automated prediction service with historical pattern optimization
+- Added PostgreSQL database with Drizzle ORM for data persistence
+- Built comprehensive dashboard with automated and manual prediction tabs
 
 ## User Preferences
 

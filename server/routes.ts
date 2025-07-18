@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertFixtureSchema, insertPredictionSchema, insertJackpotSchema } from "@shared/schema";
+import { automatedPredictionService } from "./services/automated-prediction-service";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -96,6 +97,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(summary);
     } catch (error) {
       res.status(500).json({ message: "Failed to generate summary" });
+    }
+  });
+
+  // Automated prediction generation
+  app.post("/api/predictions/automated", async (req, res) => {
+    try {
+      console.log("🚀 Starting automated prediction generation...");
+      const result = await automatedPredictionService.generateAutomatedPredictions();
+      res.json(result);
+    } catch (error) {
+      console.error("❌ Automated prediction error:", error);
+      res.status(500).json({ 
+        message: "Failed to generate automated predictions",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Get real-time jackpot data
+  app.get("/api/jackpot/live", async (req, res) => {
+    try {
+      const { sportpesaScraper } = await import("./scrapers/sportpesa-scraper");
+      const jackpotData = await sportpesaScraper.getCurrentJackpot();
+      
+      if (!jackpotData) {
+        return res.status(404).json({ message: "No current jackpot found" });
+      }
+      
+      res.json(jackpotData);
+    } catch (error) {
+      console.error("Error fetching live jackpot:", error);
+      res.status(500).json({ message: "Failed to fetch live jackpot data" });
     }
   });
 
