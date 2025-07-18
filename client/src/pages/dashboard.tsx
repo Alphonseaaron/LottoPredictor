@@ -71,13 +71,15 @@ export default function Dashboard() {
     enabled: !!jackpot,
   });
 
-  // Auto-load SportPesa fixtures when no fixtures are available
+  // Auto-load SportPesa fixtures when no fixtures are available (only once)
+  const [hasAutoTriggered, setHasAutoTriggered] = React.useState(false);
   React.useEffect(() => {
-    if (jackpot && fixtures.length === 0 && !scrapeMutation.isPending) {
+    if (jackpot && fixtures.length === 0 && !scrapeMutation.isPending && !hasAutoTriggered) {
       console.log('Auto-triggering SportPesa scraping...');
+      setHasAutoTriggered(true);
       scrapeMutation.mutate();
     }
-  }, [jackpot, fixtures.length]);
+  }, [jackpot, fixtures.length, hasAutoTriggered]);
 
   // Get prediction summary
   const { data: summary } = useQuery<PredictionSummary>({
@@ -295,32 +297,22 @@ export default function Dashboard() {
                         </div>
                       </div>
                       
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         {fixtures.map((fixture, index) => (
-                          <div key={fixture.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div className="flex items-center space-x-4">
-                              <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">
+                          <div key={fixture.id} className="flex items-center justify-between p-3 bg-white border rounded-lg hover:shadow-sm transition-shadow">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-medium">
                                 {index + 1}
                               </div>
-                              <div>
-                                <div className="font-medium text-gray-900">
-                                  {fixture.homeTeam} vs {fixture.awayTeam}
-                                </div>
-                                <div className="text-sm text-gray-500">
-                                  {new Date(fixture.matchDate).toLocaleDateString()}
-                                </div>
+                              <div className="font-medium text-gray-900">
+                                {fixture.homeTeam} vs {fixture.awayTeam}
                               </div>
                             </div>
                             {fixture.prediction && (
-                              <div className="flex items-center space-x-2">
-                                <Badge className={getPredictionBadgeColor(fixture.prediction.prediction)}>
-                                  {fixture.prediction.prediction === "1" ? "Home Win" : 
-                                   fixture.prediction.prediction === "X" ? "Draw" : "Away Win"}
-                                </Badge>
-                                <span className="text-sm text-gray-500">
-                                  {fixture.prediction.confidence}%
-                                </span>
-                              </div>
+                              <Badge className={getPredictionBadgeColor(fixture.prediction.prediction)}>
+                                {fixture.prediction.prediction === "1" ? "1" : 
+                                 fixture.prediction.prediction === "X" ? "X" : "2"}
+                              </Badge>
                             )}
                           </div>
                         ))}
@@ -407,17 +399,23 @@ export default function Dashboard() {
                 </div>
 
                 <Button 
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => generatePredictionsMutation.mutate()}
-                  disabled={generatePredictionsMutation.isPending || fixtures.length !== 17}
+                  disabled={generatePredictionsMutation.isPending || fixtures.length === 0}
                 >
                   {generatePredictionsMutation.isPending ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
-                    <WandSparkles className="h-4 w-4 mr-2" />
+                    <Zap className="h-4 w-4 mr-2" />
                   )}
                   Generate Complete Analysis & Predictions
                 </Button>
+                
+                {fixtures.length === 0 && (
+                  <p className="text-sm text-center text-gray-500 mt-2">
+                    Load fixtures first to enable predictions
+                  </p>
+                )}
 
                 {generatePredictionsMutation.isPending && (
                   <div className="space-y-3">
