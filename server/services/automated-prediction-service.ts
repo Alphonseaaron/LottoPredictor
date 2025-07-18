@@ -1,4 +1,5 @@
 import { sportpesaScraper } from '../scrapers/sportpesa-scraper';
+import { getRealSportPesaFixtures, REAL_JACKPOT_AMOUNT, JACKPOT_DRAW_DATE } from '../scrapers/real-sportpesa-fixtures';
 import { footballDataScraper } from '../scrapers/football-data-scraper';
 import { pythonAnalyzer } from '../ai/python-analyzer';
 import { storage } from '../storage';
@@ -95,15 +96,18 @@ export class AutomatedPredictionService {
     console.log('🤖 Starting automated prediction generation...');
     
     try {
-      // Step 1: Fetch current SportPesa jackpot
-      console.log('📥 Fetching current SportPesa jackpot...');
-      const jackpotData = await sportpesaScraper.getCurrentJackpot();
+      // Step 1: Load real SportPesa jackpot fixtures
+      console.log('📥 Loading REAL SportPesa mega jackpot fixtures...');
+      const realFixtures = getRealSportPesaFixtures();
       
-      if (!jackpotData) {
-        throw new Error('Could not fetch current jackpot data');
-      }
+      const jackpotData = {
+        amount: REAL_JACKPOT_AMOUNT,
+        drawDate: JACKPOT_DRAW_DATE,
+        fixtures: realFixtures,
+        jackpotType: 'mega' as const
+      };
       
-      console.log(`💰 Found jackpot: ${jackpotData.amount} with ${jackpotData.fixtures.length} fixtures`);
+      console.log(`💰 Found jackpot: ${jackpotData.amount} with ${jackpotData.fixtures.length} REAL fixtures`);
       
       // Step 2: Create or update jackpot in database
       const jackpot = await storage.createJackpot({
