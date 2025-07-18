@@ -119,9 +119,17 @@ export class MemStorage implements IStorage {
   }
 
   async getCurrentJackpot(): Promise<Jackpot | undefined> {
-    return Array.from(this.jackpots.values()).find(
+    // Get the most recent active jackpot by creation date
+    const activeJackpots = Array.from(this.jackpots.values()).filter(
       jackpot => jackpot.status === "active"
     );
+    
+    if (activeJackpots.length === 0) return undefined;
+    
+    // Return the most recently created active jackpot
+    return activeJackpots.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )[0];
   }
 
   async updateJackpot(id: number, updates: Partial<Jackpot>): Promise<Jackpot> {
