@@ -83,7 +83,8 @@ export default function AutomatedPredictor() {
   };
 
   const getStrategyColor = (strategy: string) => {
-    switch (strategy) {
+    if (!strategy) return 'bg-gray-100 text-gray-800';
+    switch (strategy.toLowerCase()) {
       case 'conservative': return 'bg-green-100 text-green-800';
       case 'aggressive': return 'bg-red-100 text-red-800';
       case 'balanced': return 'bg-blue-100 text-blue-800';
@@ -191,7 +192,7 @@ export default function AutomatedPredictor() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-700">Strategy:</span>
                     <Badge className={getStrategyColor(result.strategy)}>
-                      {result.strategy.charAt(0).toUpperCase() + result.strategy.slice(1)}
+                      {result.strategy ? result.strategy.charAt(0).toUpperCase() + result.strategy.slice(1) : 'Unknown'}
                     </Badge>
                   </div>
 
