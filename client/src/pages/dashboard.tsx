@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,11 +45,39 @@ export default function Dashboard() {
     queryKey: ["/api/jackpot/current"],
   });
 
+  // Auto-trigger SportPesa scraping if no fixtures
+  const scrapeMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/scrape/sportpesa", {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/jackpot/current"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/fixtures"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/predictions/summary"] });
+      toast({ title: "SportPesa fixtures loaded successfully!" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Failed to load SportPesa fixtures", 
+        description: error.message,
+        variant: "destructive" 
+      });
+    }
+  });
+
   // Get fixtures
   const { data: fixtures = [] } = useQuery<FixtureWithPrediction[]>({
     queryKey: ["/api/fixtures", jackpot?.id],
     enabled: !!jackpot,
   });
+
+  // Auto-load SportPesa fixtures when no fixtures are available
+  React.useEffect(() => {
+    if (jackpot && fixtures.length === 0 && !scrapeMutation.isPending) {
+      console.log('Auto-triggering SportPesa scraping...');
+      scrapeMutation.mutate();
+    }
+  }, [jackpot, fixtures.length]);
 
   // Get prediction summary
   const { data: summary } = useQuery<PredictionSummary>({
@@ -207,15 +235,92 @@ export default function Dashboard() {
             <div className="space-y-6">
               <Card>
                 <CardHeader className="border-b border-gray-200">
-                  <CardTitle className="text-lg font-semibold text-gray-900">Jackpot Fixtures</CardTitle>
-                  <p className="text-sm text-gray-600">Import fixtures manually or load from CSV</p>
-                </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  <div className="space-y-4">
+                  <div className="flex justify-between items-center">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Import from CSV
-                      </label>
+                      <CardTitle className="text-lg font-semibold text-gray-900">Jackpot Fixtures</CardTitle>
+                      <p className="text-sm text-gray-600">
+                        {fixtures.length > 0 
+                          ? `Showing ${fixtures.length} SportPesa mega jackpot fixtures` 
+                          : "Loading SportPesa fixtures automatically..."
+                        }
+                      </p>
+                    </div>
+                    <Button
+                      onClick={() => scrapeMutation.mutate()}
+                      disabled={scrapeMutation.isPending}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center space-x-2"
+                    >
+                      {scrapeMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Bot className="h-4 w-4" />
+                      )}
+                      <span>Load SportPesa</span>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  {fixtures.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Bot className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No fixtures loaded</h3>
+                      <p className="text-sm text-gray-500 mb-4">
+                        Click "Load SportPesa" to automatically fetch the latest mega jackpot fixtures
+                      </p>
+                      <Button
+                        onClick={() => scrapeMutation.mutate()}
+                        disabled={scrapeMutation.isPending}
+                        className="flex items-center space-x-2"
+                      >
+                        {scrapeMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Bot className="h-4 w-4" />
+                        )}
+                        <span>Load SportPesa Fixtures</span>
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {fixtures.map((fixture, index) => (
+                        <div key={fixture.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">
+                              {index + 1}
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900">
+                                {fixture.homeTeam} vs {fixture.awayTeam}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {new Date(fixture.matchDate).toLocaleDateString()}
+                              </div>
+                            </div>
+                          </div>
+                          {fixture.prediction && (
+                            <div className="flex items-center space-x-2">
+                              <Badge className={getPredictionBadgeColor(fixture.prediction.prediction)}>
+                                {fixture.prediction.prediction === "1" ? "Home Win" : 
+                                 fixture.prediction.prediction === "X" ? "Draw" : "Away Win"}
+                              </Badge>
+                              <span className="text-sm text-gray-500">
+                                {fixture.prediction.confidence}%
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Manual CSV Import - Collapsed by default */}
+                  <details className="mt-6">
+                    <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900">
+                      Manual CSV Import (Advanced)
+                    </summary>
+                    <div className="mt-4 space-y-4">
                       <Textarea
                         placeholder="Paste CSV data here (format: Home Team, Away Team, Date)..."
                         value={csvInput}
@@ -223,60 +328,21 @@ export default function Dashboard() {
                         rows={6}
                         className="w-full"
                       />
-                    </div>
-                    
-                    <div className="flex space-x-3">
-                      <Button 
+                      <Button
                         onClick={() => importCsvMutation.mutate()}
                         disabled={!csvInput.trim() || importCsvMutation.isPending}
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="w-full"
                       >
                         {importCsvMutation.isPending ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         ) : (
-                          <Upload className="h-4 w-4 mr-2" />
+                          <Upload className="mr-2 h-4 w-4" />
                         )}
-                        Import Fixtures
-                      </Button>
-                      
-                      <Button 
-                        variant="outline"
-                        onClick={clearPredictions}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Clear All
+                        Import CSV
                       </Button>
                     </div>
-                  </div>
+                  </details>
 
-                  {fixtures.length > 0 && (
-                    <div className="mt-6">
-                      <h4 className="font-medium text-gray-900 mb-3">Loaded Fixtures ({fixtures.length})</h4>
-                      <div className="space-y-2 max-h-48 overflow-y-auto">
-                        {fixtures.slice(0, 3).map((fixture, index) => (
-                          <div key={fixture.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div>
-                              <p className="font-medium text-sm">{fixture.homeTeam} vs {fixture.awayTeam}</p>
-                              <p className="text-xs text-gray-500">
-                                {new Date(fixture.matchDate).toLocaleDateString()} • {
-                                  fixture.prediction ? `Predicted: ${fixture.prediction.prediction}` : "No prediction"
-                                }
-                              </p>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                              <span className="text-sm text-gray-600">Ready</span>
-                            </div>
-                          </div>
-                        ))}
-                        {fixtures.length > 3 && (
-                          <div className="text-center py-4">
-                            <p className="text-sm text-gray-500">+ {fixtures.length - 3} more matches loaded</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </div>
