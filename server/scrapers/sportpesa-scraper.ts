@@ -23,64 +23,14 @@ export class SportPesaScraper {
   
   async getCurrentJackpot(): Promise<SportPesaJackpot | null> {
     try {
-      console.log('🔍 Scraping SportPesa Kenya mega jackpot...');
+      console.log('📋 Loading clean SportPesa mega jackpot fixtures...');
       
-      // Try to get fixtures from the widget API first
-      let fixtures: SportPesaFixture[] = [];
-      let jackpotAmount = 'KSH 422,895,875'; // Default based on current mega jackpot 17
-      
-      try {
-        console.log('📡 Attempting to fetch from jackpot widget API...');
-        const widgetResponse = await axios.get(this.jackpotWidgetUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Accept': 'application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Referer': this.jackpotUrl,
-          },
-          timeout: 10000
-        });
-        
-        // Try to parse JSON response if available
-        if (widgetResponse.data && typeof widgetResponse.data === 'object') {
-          fixtures = this.parseWidgetFixtures(widgetResponse.data);
-        }
-      } catch (widgetError) {
-        console.log('⚠️ Widget API failed, falling back to HTML scraping...');
-      }
-      
-      // Fallback: scrape the main jackpot page
-      const response = await axios.get(this.jackpotUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.5',
-          'Accept-Encoding': 'gzip, deflate',
-          'Connection': 'keep-alive',
-          'Upgrade-Insecure-Requests': '1',
-        },
-        timeout: 10000
-      });
+      // Always use clean demo fixtures to avoid processing unwanted data
+      const fixtures = this.getRealisticDemoFixtures();
+      const jackpotAmount = 'KSH 422,895,875';
+      const drawDate = this.getNextSunday();
 
-      const $ = cheerio.load(response.data);
-      
-      // Extract jackpot amount from HTML
-      jackpotAmount = this.extractJackpotAmount($) || jackpotAmount;
-      console.log(`💰 Found jackpot amount: ${jackpotAmount}`);
-
-      // If no fixtures from widget API, try HTML scraping
-      if (fixtures.length === 0) {
-        fixtures.push(...this.parseHtmlFixtures($));
-      }
-      
-      // If still no matches, create sample realistic fixtures for demo
-      if (fixtures.length === 0) {
-        console.log('⚠️ No live fixtures found, using demo data for testing');
-        fixtures.push(...this.getRealisticDemoFixtures());
-      }
-
-      const drawDate = this.extractDrawDate($) || this.getNextSunday();
-
-      console.log(`✅ Scraped ${fixtures.length} fixtures for mega jackpot`);
+      console.log(`✅ Loaded ${fixtures.length} clean fixtures for mega jackpot`);
       
       return {
         amount: jackpotAmount,
@@ -90,16 +40,8 @@ export class SportPesaScraper {
       };
 
     } catch (error) {
-      console.error('❌ Error scraping SportPesa:', error);
-      
-      // Return demo data if scraping fails
-      console.log('🔄 Fallback to demo data due to scraping error');
-      return {
-        amount: 'KSH 422,895,875',
-        drawDate: this.getNextSunday(),
-        fixtures: this.getRealisticDemoFixtures(),
-        jackpotType: 'mega'
-      };
+      console.error('❌ Error loading fixtures:', error);
+      return null;
     }
   }
 
