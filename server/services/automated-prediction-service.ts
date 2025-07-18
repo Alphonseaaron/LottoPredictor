@@ -1,6 +1,7 @@
 import { sportpesaScraper } from '../scrapers/sportpesa-scraper';
 import { footballDataScraper } from '../scrapers/football-data-scraper';
 import { openaiAnalyzer } from '../ai/openai-analyzer';
+import { pythonAnalyzer } from '../ai/python-analyzer';
 import { storage } from '../storage';
 import type { InsertFixture, InsertPrediction } from '@shared/schema';
 
@@ -67,24 +68,58 @@ export class AutomatedPredictionService {
         })
       );
       
-      // Step 5: Get AI analysis for each match
+      // Step 5: Get AI analysis for each match (try OpenAI first, fallback to Python)
       console.log('🧠 Generating AI-powered predictions...');
       const aiAnalyses = await Promise.all(
         matchAnalyses.map(async (analysis, index) => {
           const fixture = jackpotData.fixtures[index];
-          return await openaiAnalyzer.analyzeMatch(
-            fixture.homeTeam,
-            fixture.awayTeam,
-            analysis.homeTeam,
-            analysis.awayTeam,
-            analysis.h2h
-          );
+          
+          try {
+            // Try OpenAI first
+            return await openaiAnalyzer.analyzeMatch(
+              fixture.homeTeam,
+              fixture.awayTeam,
+              analysis.homeTeam,
+              analysis.awayTeam,
+              analysis.h2h
+            );
+          } catch (error: any) {
+            // If OpenAI fails (quota exceeded), use Python analyzer
+            if (error.code === 'insufficient_quota' || error.status === 429) {
+              console.log(`🐍 Using Python analyzer for ${fixture.homeTeam} vs ${fixture.awayTeam}`);
+              return await pythonAnalyzer.analyzeMatch(
+                fixture.homeTeam,
+                fixture.awayTeam,
+                analysis.homeTeam,
+                analysis.awayTeam,
+                analysis.h2h
+              );
+            }
+            throw error;
+          }
         })
       );
       
       // Step 6: Get overall jackpot strategy
       console.log('📊 Analyzing overall jackpot strategy...');
-      const jackpotAnalysis = await openaiAnalyzer.analyzeFullJackpot(matchAnalyses);
+      let jackpotAnalysis;
+      try {
+        jackpotAnalysis = await openaiAnalyzer.analyzeFullJackpot(matchAnalyses);
+      } catch (error: any) {
+        // Fallback strategy when OpenAI quota exceeded
+        if (error.code === 'insufficient_quota' || error.status === 429) {
+          console.log('🐍 Using fallback strategy analysis due to API quota');
+          jackpotAnalysis = {
+            overallStrategy: 'balanced' as const,
+            expectedDistribution: { home: 5, draw: 6, away: 6 },
+            highConfidencePicks: aiAnalyses.filter(a => a.confidence >= 75).length,
+            wildcardSuggestions: ['Monitor team news before final selections'],
+            riskAssessment: 'Balanced approach targeting historical 5-6-6 pattern'
+          };
+        } else {
+          throw error;
+        }
+      }
       
       // Step 7: Generate optimized predictions based on AI analysis
       console.log('🎯 Optimizing predictions using historical patterns...');

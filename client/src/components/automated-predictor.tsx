@@ -207,7 +207,7 @@ export default function AutomatedPredictor() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-700">Distribution:</span>
                     <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
-                      {result.summary.homeWins}-{result.summary.draws}-{result.summary.awayWins}
+                      {result.summary ? `${result.summary.homeWins}-${result.summary.draws}-${result.summary.awayWins}` : '0-0-0'}
                     </span>
                   </div>
                 </div>
