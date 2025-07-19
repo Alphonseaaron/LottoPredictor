@@ -12,7 +12,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const jackpot = await storage.getCurrentJackpot();
       res.json(jackpot);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch jackpot" });
+      console.log('Failed to fetch jackpot:', error);
+      // Return a helpful response indicating analysis is in progress
+      res.status(202).json({ 
+        message: "Jackpot analysis in progress", 
+        status: "processing",
+        note: "SportPesa analysis is currently running. Please wait for completion."
+      });
     }
   });
 
@@ -40,7 +46,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const fixtures = await storage.getFixturesWithPredictions(jackpotId);
       res.json(fixtures);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch fixtures" });
+      console.log('Failed to fetch fixtures:', error);
+      res.status(500).json({ message: "Failed to fetch fixtures", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
