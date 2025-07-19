@@ -507,58 +507,58 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-2 text-sm font-medium text-gray-700">#</th>
-                      <th className="text-left py-3 px-2 text-sm font-medium text-gray-700">Match</th>
-                      <th className="text-left py-3 px-2 text-sm font-medium text-gray-700">Prediction</th>
-                      <th className="text-left py-3 px-2 text-sm font-medium text-gray-700">Confidence</th>
-                      <th className="text-left py-3 px-2 text-sm font-medium text-gray-700">Reasoning</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {fixtures.map((fixture, index) => (
-                      <tr key={fixture.id} className="border-b border-gray-100">
-                        <td className="py-3 px-2 text-sm text-gray-600">{index + 1}</td>
-                        <td className="py-3 px-2">
-                          <div className="text-sm font-medium text-gray-900">
-                            {fixture.homeTeam} vs {fixture.awayTeam}
+              <div className="space-y-4">
+                {fixtures.map((fixture, index) => (
+                  <Card key={fixture.id} className="border border-gray-200">
+                    <CardHeader className="pb-3">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                            {index + 1}
                           </div>
-                          <div className="text-xs text-gray-500">
-                            {new Date(fixture.matchDate).toLocaleDateString()}
+                          <div>
+                            <h4 className="font-semibold text-gray-900">
+                              {fixture.homeTeam} vs {fixture.awayTeam}
+                            </h4>
+                            <p className="text-xs text-gray-500">
+                              {new Date(fixture.matchDate).toLocaleDateString()}
+                            </p>
                           </div>
-                        </td>
-                        <td className="py-3 px-2">
+                        </div>
+                        <div className="flex items-center space-x-3">
                           {fixture.prediction ? (
-                            <Badge className={getPredictionBadgeColor(fixture.prediction.prediction)}>
-                              {fixture.prediction.prediction}
-                            </Badge>
+                            <>
+                              <Badge className={getPredictionBadgeColor(fixture.prediction.prediction)}>
+                                {fixture.prediction.prediction}
+                              </Badge>
+                              <div className="flex items-center space-x-2">
+                                <Progress 
+                                  value={fixture.prediction.confidence} 
+                                  className="w-20 h-3" 
+                                />
+                                <span className="text-sm font-medium text-gray-700">
+                                  {fixture.prediction.confidence}%
+                                </span>
+                              </div>
+                            </>
                           ) : (
-                            <span className="text-xs text-gray-400">Pending</span>
+                            <span className="text-sm text-gray-400">Analysis Pending</span>
                           )}
-                        </td>
-                        <td className="py-3 px-2">
-                          {fixture.prediction ? (
-                            <div className="flex items-center space-x-2">
-                              <Progress 
-                                value={fixture.prediction.confidence} 
-                                className="w-16 h-2" 
-                              />
-                              <span className="text-xs font-medium">{fixture.prediction.confidence}%</span>
-                            </div>
-                          ) : (
-                            <span className="text-xs text-gray-400">-</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-2 text-xs text-gray-600 max-w-xs truncate">
-                          {fixture.prediction?.reasoning || '-'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    {fixture.prediction?.reasoning && (
+                      <CardContent className="pt-0">
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <h5 className="text-sm font-medium text-gray-700 mb-2">Complete Analysis</h5>
+                          <div className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">
+                            {fixture.prediction.reasoning}
+                          </div>
+                        </div>
+                      </CardContent>
+                    )}
+                  </Card>
+                ))}
               </div>
             </CardContent>
           </Card>
