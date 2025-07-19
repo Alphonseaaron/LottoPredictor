@@ -71,9 +71,8 @@ export class SportPesaScraper {
 
       // If still no fixtures, fall back to demo data but log it clearly
       if (fixtures.length === 0) {
-        console.log('🔄 No live fixtures found - using demo data');
-        console.log('💡 This happens due to CORS/anti-bot protection on SportPesa');
-        fixtures = this.getRealisticDemoFixtures();
+        console.log('❌ No live fixtures found from SportPesa - REAL DATA REQUIRED');
+        throw new Error('Cannot proceed without real SportPesa fixtures');
       }
 
       const drawDate = this.getNextSunday();

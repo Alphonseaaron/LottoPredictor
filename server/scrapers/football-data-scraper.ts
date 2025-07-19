@@ -72,8 +72,8 @@ export class FootballDataScraper {
       };
 
     } catch (error) {
-      console.log(`⚠️ Using fallback analysis for ${homeTeam} vs ${awayTeam}`);
-      return this.getFallbackAnalysis(homeTeam, awayTeam);
+      console.log(`❌ Real data fetch failed for ${homeTeam} vs ${awayTeam} - NO FALLBACK`);
+      throw new Error(`Unable to fetch verified real data for ${homeTeam} vs ${awayTeam}`);
     }
   }
 
@@ -159,17 +159,9 @@ export class FootballDataScraper {
       };
     }
     
-    // Enhanced Fallback: Maximum Intelligence Analysis
-    console.log(`   🧠 MAXIMUM INTELLIGENCE FALLBACK: ${teamName}`);
-    const maxIntelStats = this.generateMaximumIntelligenceStats(teamName);
-    console.log(`   ✅ MAX INTELLIGENCE: Pos ${maxIntelStats.position}, Form ${maxIntelStats.form}, Goals ${maxIntelStats.goalsFor}/${maxIntelStats.goalsAgainst}`);
-    
-    return {
-      ...maxIntelStats,
-      recentForm: maxIntelStats.form,
-      sources: ['Maximum Intelligence Analysis'],
-      confidence: 97
-    };
+    // NO FALLBACK - REAL DATA REQUIRED
+    console.log(`   ❌ NO VERIFIED REAL DATA AVAILABLE: ${teamName}`);
+    throw new Error(`Cannot proceed without verified real data for ${teamName}`);
   }
 
   async getH2HRecord(homeTeam: string, awayTeam: string): Promise<H2HRecord & { totalMatches: number }> {
@@ -191,11 +183,11 @@ export class FootballDataScraper {
         }
       }
       
-      console.log(`   ⚠️ No real H2H data found, using team name analysis...`);
-      return this.generateIntelligentH2H(homeTeam, awayTeam);
+      console.log(`   ❌ No real H2H data found from verified sources`);
+      throw new Error(`No verified H2H data available for ${homeTeam} vs ${awayTeam}`);
     } catch (error) {
       console.log(`   ❌ H2H data fetch failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      return this.generateIntelligentH2H(homeTeam, awayTeam);
+      throw new Error(`H2H data fetch failed for ${homeTeam} vs ${awayTeam}`);
     }
   }
 
@@ -213,8 +205,9 @@ export class FootballDataScraper {
       console.log(`   ❌ Away data failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
     }
     
-    // Generate intelligent fallback based on team name and patterns
-    return this.generateIntelligentAwayRecord(teamName);
+    // NO FALLBACK - REAL DATA REQUIRED
+    console.log(`   ❌ NO VERIFIED AWAY DATA: ${teamName}`);
+    throw new Error(`Cannot proceed without verified away performance data for ${teamName}`);
   }
 
   async getVenueStats(teamName: string): Promise<{ homeWins: number; homeDraws: number; homeLosses: number }> {
@@ -231,8 +224,9 @@ export class FootballDataScraper {
       console.log(`   ❌ Venue data failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
     }
     
-    // Generate intelligent fallback based on team analysis
-    return this.generateIntelligentVenueStats(teamName);
+    // NO FALLBACK - REAL DATA REQUIRED  
+    console.log(`   ❌ NO VERIFIED VENUE DATA: ${teamName}`);
+    throw new Error(`Cannot proceed without verified venue performance data for ${teamName}`);
   }
 
   // REAL DATA FETCHING METHODS

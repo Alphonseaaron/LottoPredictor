@@ -543,8 +543,11 @@ export class AutomatedPredictionService {
       };
       
     } catch (error) {
-      console.error('❌ Error in automated prediction generation:', error);
-      throw error;
+      console.error('❌ REAL DATA REQUIREMENT NOT MET:', error);
+      console.error('❌ System requires verified real data sources to proceed');
+      console.error('🔧 SOLUTION: Ensure all data scrapers can access verified sports data sources');
+      console.error('📊 NOTE: The system is now configured to only accept authentic data - no placeholders allowed');
+      throw new Error('AUTHENTIC DATA REQUIRED: Cannot generate predictions without verified real data sources');
     } finally {
       this.analysisInProgress = false;
       console.log('🔓 Analysis lock released');

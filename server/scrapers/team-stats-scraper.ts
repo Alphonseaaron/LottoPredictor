@@ -48,12 +48,11 @@ export class TeamStatsScaper {
         }
       }
       
-      console.log(`⚠️ All sources failed for ${teamName}, using enhanced mock data`);
-      return this.generateEnhancedTeamStats(teamName);
+      console.log(`❌ All sources failed for ${teamName} - NO FALLBACK DATA`);
+      throw new Error(`Unable to fetch real data for ${teamName} from any verified source`);
     } catch (error) {
-      console.error(`Error fetching stats for ${teamName}:`, error);
-      return this.generateEnhancedTeamStats(teamName);
-    }
+      console.error(`❌ REAL DATA REQUIRED: Cannot fetch stats for ${teamName}:`, error);
+      throw new Error(`No verified real data available for ${teamName}`);
   }
 
   async getH2HRecord(homeTeam: string, awayTeam: string): Promise<H2HRecord> {
@@ -79,11 +78,11 @@ export class TeamStatsScaper {
         }
       }
       
-      console.log(`⚠️ All H2H sources failed, using enhanced analysis`);
-      return this.generateEnhancedH2H(homeTeam, awayTeam);
+      console.log(`❌ All H2H sources failed - NO FALLBACK DATA`);
+      throw new Error(`No verified real H2H data available for ${homeTeam} vs ${awayTeam}`);
     } catch (error) {
-      console.error(`Error fetching H2H for ${homeTeam} vs ${awayTeam}:`, error);
-      return this.generateEnhancedH2H(homeTeam, awayTeam);
+      console.error(`❌ REAL DATA REQUIRED: Cannot fetch H2H for ${homeTeam} vs ${awayTeam}:`, error);
+      throw new Error(`No verified H2H data available for ${homeTeam} vs ${awayTeam}`);
     }
   }
 
