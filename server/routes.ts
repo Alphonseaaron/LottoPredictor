@@ -71,6 +71,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Reset analysis lock - allows restarting stuck analysis
+  app.post("/api/scrape/reset", async (req, res) => {
+    try {
+      console.log('🔄 Resetting analysis lock...');
+      automatedPredictionService.resetAnalysisLock();
+      res.json({ 
+        success: true, 
+        message: 'Analysis lock reset successfully' 
+      });
+    } catch (error) {
+      console.error('❌ Failed to reset analysis lock:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to reset analysis lock',
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   // Get scraping status
   app.get("/api/scrape/status", async (req, res) => {
     try {

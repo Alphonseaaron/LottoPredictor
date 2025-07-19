@@ -25,6 +25,16 @@ export class AutomatedPredictionService {
   private lastStartTime: number = 0;
 
   /**
+   * Reset analysis lock - allows restarting stuck analysis
+   */
+  resetAnalysisLock(): void {
+    console.log('🔄 Resetting analysis lock...');
+    this.analysisInProgress = false;
+    this.lastStartTime = 0;
+    console.log('✅ Analysis lock reset successfully');
+  }
+
+  /**
    * Setup automatic scraping and prediction generation
    */
   setupAutomatedSchedule(): void {

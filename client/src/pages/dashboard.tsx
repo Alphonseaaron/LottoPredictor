@@ -72,6 +72,23 @@ export default function Dashboard() {
     }
   });
 
+  // Reset analysis lock
+  const resetMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("POST", "/api/scrape/reset", {});
+    },
+    onSuccess: () => {
+      toast({ title: "Analysis reset successfully!" });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Failed to reset analysis", 
+        description: error.message,
+        variant: "destructive" 
+      });
+    }
+  });
+
   // Get fixtures
   const { data: fixtures = [] } = useQuery<FixtureWithPrediction[]>({
     queryKey: ["/api/fixtures", jackpot?.id],
@@ -300,20 +317,36 @@ export default function Dashboard() {
                         }
                       </p>
                     </div>
-                    <Button
-                      onClick={() => scrapeMutation.mutate()}
-                      disabled={scrapeMutation.isPending}
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center space-x-2"
-                    >
-                      {scrapeMutation.isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Bot className="h-4 w-4" />
-                      )}
-                      <span>Load SportPesa</span>
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button
+                        onClick={() => scrapeMutation.mutate()}
+                        disabled={scrapeMutation.isPending}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center space-x-2"
+                      >
+                        {scrapeMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Bot className="h-4 w-4" />
+                        )}
+                        <span>Load SportPesa</span>
+                      </Button>
+                      <Button
+                        onClick={() => resetMutation.mutate()}
+                        disabled={resetMutation.isPending}
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center space-x-2"
+                      >
+                        {resetMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Zap className="h-4 w-4" />
+                        )}
+                        <span>Reset Analysis</span>
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="p-6">
