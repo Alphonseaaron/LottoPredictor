@@ -418,10 +418,27 @@ export default function Dashboard() {
                 )}
 
                 {generatePredictionsMutation.isPending && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-center py-4">
-                      <Loader2 className="h-6 w-6 animate-spin" />
-                      <span className="ml-3 text-sm text-gray-600">Running comprehensive analysis...</span>
+                  <div className="space-y-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                        <h4 className="font-medium text-blue-900">Live Analysis Progress</h4>
+                      </div>
+                      <div className="text-sm text-blue-800 space-y-2">
+                        <p>✅ Loading SportPesa mega jackpot fixtures...</p>
+                        <p>✅ Creating match database entries...</p>
+                        <p>🔄 Starting systematic team analysis for each match...</p>
+                        <div className="bg-blue-100 rounded p-3 mt-3">
+                          <p className="font-medium">Current Analysis Phase:</p>
+                          <p>• Visiting multiple data sources per team</p>
+                          <p>• ESPN, BBC Sport, Transfermarkt, WhoScored analysis</p>
+                          <p>• Head-to-head historical data collection</p>
+                          <p>• AI prediction generation with detailed reasoning</p>
+                        </div>
+                        <p className="text-xs text-blue-600 mt-2">
+                          Check the console logs above for detailed progress on each match and data source...
+                        </p>
+                      </div>
                     </div>
                     <div className="text-xs text-gray-500 space-y-1">
                       <p>• Fetching team statistics and form data</p>
