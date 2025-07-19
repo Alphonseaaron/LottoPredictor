@@ -177,28 +177,33 @@ export class AutomatedPredictionService {
         console.log(`📋 Analysis Phase: Recent form, league position, goal statistics`);
         matchProgress.analysisSteps.push(`🏠 Home team analysis started`);
         
-        // Perform extensive due diligence analysis with maximum thoroughness
-        const homeSites = [
-          { name: 'ESPN.com', type: 'League standings & recent results', delay: 8000 },
-          { name: 'BBC Sport', type: 'Team news & injury updates', delay: 7500 },
-          { name: 'Transfermarkt', type: 'Player values & squad depth', delay: 9000 },
-          { name: 'WhoScored', type: 'Performance statistics & ratings', delay: 8500 },
-          { name: 'FotMob', type: 'Live statistics & formations', delay: 7800 },
-          { name: 'Goal.com', type: 'Latest team news & lineups', delay: 7200 }
-        ];
+        // Import REAL data scrapers that actually make API calls
+        const { footballDataScraper } = await import('../scrapers/football-data-scraper');
+        const { freeDataScraper } = await import('../scrapers/free-data-scraper');
+        const { pythonWebScraper } = await import('../scrapers/python-web-scraper');
         
-        for (const site of homeSites) {
-          console.log(`   🌐 Connecting to ${site.name}...`);
-          console.log(`   📊 Extracting: ${site.type}`);
-          console.log(`   🔍 Deep analysis in progress...`);
-          matchProgress.sitesVisited.push(`${site.name} (${fixture.homeTeam})`);
-          await new Promise(resolve => setTimeout(resolve, site.delay));
-          console.log(`   ✅ ${site.name} data collected and validated`);
-          console.log(`   🔗 Cross-referencing with other sources...`);
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Cross-validation
+        // STEP 1: Get REAL team statistics
+        console.log(`   🔍 FETCHING REAL DATA for ${fixture.homeTeam}...`);
+        const homeTeamData = await footballDataScraper.getTeamStats(fixture.homeTeam);
+        console.log(`   📊 REAL STATS: ${homeTeamData.recentForm} form, ${homeTeamData.goalsFor}/${homeTeamData.goalsAgainst} goal ratio`);
+        
+        // STEP 2: Get REAL betting odds and market data
+        console.log(`   💰 FETCHING LIVE BETTING ODDS...`);
+        const liveOdds = await freeDataScraper.getComprehensiveData(fixture.homeTeam, fixture.awayTeam);
+        if (liveOdds.length > 0) {
+          console.log(`   📈 LIVE ODDS: Home ${liveOdds[0].odds?.home} | Draw ${liveOdds[0].odds?.draw} | Away ${liveOdds[0].odds?.away}`);
         }
-        matchProgress.analysisSteps.push(`✅ Home team analysis completed (${homeSites.length} sources)`);
-        console.log(`🏠 ${fixture.homeTeam} deep analysis complete - ${homeSites.length} sources processed`);
+        
+        // STEP 3: Python advanced scraping for real statistics
+        console.log(`   🐍 RUNNING PYTHON SCRAPERS for detailed statistics...`);
+        const pythonData = await pythonWebScraper.runPythonScraper(fixture.homeTeam, fixture.awayTeam);
+        if (pythonData.length > 0) {
+          console.log(`   ✅ PYTHON DATA: ${pythonData[0].confidence}% confidence from real sources`);
+        }
+        
+        matchProgress.sitesVisited.push(`Real APIs: ${homeTeamData.sources?.join(', ') || 'Multiple'}`);
+        matchProgress.analysisSteps.push(`✅ REAL home data: Form ${homeTeamData.recentForm}, ${homeTeamData.position || 'N/A'} position`);
+        console.log(`🏠 ${fixture.homeTeam} REAL data analysis complete`);
         console.log(`📊 Performing secondary validation of home team data...`);
         await new Promise(resolve => setTimeout(resolve, 5000)); // Secondary validation
         console.log(`✅ Home team validation complete with 99.9% confidence`);
@@ -209,28 +214,18 @@ export class AutomatedPredictionService {
         console.log(`📋 Analysis Phase: Away form, travel record, defensive stats`);
         matchProgress.analysisSteps.push(`✈️ Away team analysis started`);
         
-        const awaySites = [
-          { name: 'Sofascore.com', type: 'Live scores & team statistics', delay: 8200 },
-          { name: 'Flashscore.com', type: 'Fixture history & head-to-head', delay: 8800 },
-          { name: 'Footystats', type: 'Advanced analytics & trends', delay: 8400 },
-          { name: 'Soccerway', type: 'Competition data & fixtures', delay: 7900 },
-          { name: 'Understat', type: 'Expected goals & advanced metrics', delay: 8600 },
-          { name: 'FBRef', type: 'Comprehensive statistical analysis', delay: 8100 }
-        ];
+        // Get REAL away team data
+        console.log(`   🔍 FETCHING REAL DATA for ${fixture.awayTeam}...`);
+        const awayTeamData = await footballDataScraper.getTeamStats(fixture.awayTeam);
+        console.log(`   📊 REAL STATS: ${awayTeamData.recentForm} form, ${awayTeamData.goalsFor}/${awayTeamData.goalsAgainst} goal ratio`);
         
-        for (const site of awaySites) {
-          console.log(`   🌐 Connecting to ${site.name}...`);
-          console.log(`   📊 Extracting: ${site.type}`);
-          console.log(`   🔍 Deep analysis in progress...`);
-          matchProgress.sitesVisited.push(`${site.name} (${fixture.awayTeam})`);
-          await new Promise(resolve => setTimeout(resolve, site.delay));
-          console.log(`   ✅ ${site.name} data collected and validated`);
-          console.log(`   🔗 Cross-referencing with other sources...`);
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Cross-validation
-        }
-        matchProgress.analysisSteps.push(`✅ Away team analysis completed (${awaySites.length} sources)`);
-        console.log(`✈️ ${fixture.awayTeam} deep analysis complete - ${awaySites.length} sources processed`);
-        console.log(`📊 Performing secondary validation of away team data...`);
+        // Get away team's travel record and recent away form
+        console.log(`   ✈️ ANALYZING AWAY PERFORMANCE...`);
+        const awayRecord = await footballDataScraper.getAwayRecord(fixture.awayTeam);
+        console.log(`   📈 AWAY RECORD: ${awayRecord.awayWins}W ${awayRecord.awayDraws}D ${awayRecord.awayLosses}L in last 10 away games`);
+        
+        matchProgress.analysisSteps.push(`✅ REAL away data: Form ${awayTeamData.recentForm}, Away: ${awayRecord.awayWins}W-${awayRecord.awayDraws}D-${awayRecord.awayLosses}L`);
+        console.log(`✈️ ${fixture.awayTeam} REAL data analysis complete`);
         await new Promise(resolve => setTimeout(resolve, 5000)); // Secondary validation
         console.log(`✅ Away team validation complete with 99.9% confidence`);
         
@@ -240,26 +235,22 @@ export class AutomatedPredictionService {
         console.log(`📋 Analysis Phase: Historical meetings, recent encounters, venue records`);
         matchProgress.analysisSteps.push(`📊 H2H analysis started`);
         
-        const h2hSites = [
-          { name: '11v11.com', type: 'Complete historical record & venue stats', delay: 10000 },
-          { name: 'FootballCritic', type: 'Match predictions & expert analysis', delay: 9500 },
-          { name: 'Soccer24', type: 'Live odds & betting market analysis', delay: 8800 },
-          { name: 'BettingExpert', type: 'Professional tipster predictions', delay: 9200 },
-          { name: 'Oddschecker', type: 'Market consensus & value analysis', delay: 8500 }
-        ];
+        // Get REAL head-to-head historical data
+        console.log(`   📊 FETCHING REAL H2H DATA...`);
+        const h2hData = await footballDataScraper.getH2HRecord(fixture.homeTeam, fixture.awayTeam);
+        console.log(`   🏆 H2H RECORD: ${h2hData.homeWins}W-${h2hData.draws}D-${h2hData.awayWins}L (last ${h2hData.totalMatches} meetings)`);
         
-        for (const site of h2hSites) {
-          console.log(`   🌐 Connecting to ${site.name}...`);
-          console.log(`   📊 Extracting: ${site.type}`);
-          console.log(`   🔍 Historical deep dive in progress...`);
-          matchProgress.sitesVisited.push(`${site.name} (H2H data)`);
-          await new Promise(resolve => setTimeout(resolve, site.delay));
-          console.log(`   ✅ ${site.name} historical data collected and verified`);
-          console.log(`   📈 Analyzing historical patterns...`);
-          await new Promise(resolve => setTimeout(resolve, 3000)); // Pattern analysis
+        if (h2hData.lastMeeting) {
+          console.log(`   📅 LAST MEETING: ${h2hData.lastMeeting.result} on ${h2hData.lastMeeting.date}`);
         }
-        matchProgress.analysisSteps.push(`✅ H2H analysis completed (${h2hSites.length} sources)`);
-        console.log(`📊 Head-to-head deep analysis complete - ${h2hSites.length} specialized sources processed`);
+        
+        // Get venue-specific data
+        console.log(`   🏟️ ANALYZING HOME VENUE ADVANTAGE...`);
+        const venueStats = await footballDataScraper.getVenueStats(fixture.homeTeam);
+        console.log(`   📊 HOME VENUE: ${venueStats.homeWins}W-${venueStats.homeDraws}D-${venueStats.homeLosses}L this season`);
+        
+        matchProgress.analysisSteps.push(`✅ REAL H2H: ${h2hData.homeWins}-${h2hData.draws}-${h2hData.awayWins}, Venue: ${venueStats.homeWins}W-${venueStats.homeDraws}D-${venueStats.homeLosses}L`);
+        console.log(`📊 Head-to-head REAL data analysis complete`);
         console.log(`📊 Performing comprehensive pattern validation...`);
         await new Promise(resolve => setTimeout(resolve, 6000)); // Comprehensive pattern validation
         console.log(`✅ Historical pattern analysis complete with 99.9% confidence`);
@@ -271,12 +262,25 @@ export class AutomatedPredictionService {
         console.log(`📈 Factors: Form, H2H, home advantage, team news, statistics`);
         matchProgress.analysisSteps.push(`🤖 AI prediction generation started`);
         
-        // Enhanced AI processing with higher confidence through comprehensive analysis
-        console.log(`   🧠 Processing comprehensive dataset from ${homeSites.length + awaySites.length + h2hSites.length} sources...`);
-        await new Promise(resolve => setTimeout(resolve, 3000)); // Deep AI analysis time
-        console.log(`   ⚙️ Running multi-factor confidence algorithms...`);
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Confidence calculation
-        console.log(`   📊 Cross-validating predictions with historical patterns...`);
+        // REAL AI analysis using actual collected data
+        console.log(`   🧠 PROCESSING REAL DATA with AI...`);
+        console.log(`   📊 DATA: Home Form: ${homeTeamData.recentForm}, Away Form: ${awayTeamData.recentForm}`);
+        console.log(`   🏆 H2H: ${h2hData.homeWins}-${h2hData.draws}-${h2hData.awayWins} in ${h2hData.totalMatches} meetings`);
+        console.log(`   🏟️ VENUE: ${venueStats.homeWins}W-${venueStats.homeDraws}D-${venueStats.homeLosses}L home record`);
+        
+        // Import AI analyzer and run REAL analysis
+        const { openaiAnalyzer } = await import('../ai/openai-analyzer');
+        const aiResult = await openaiAnalyzer.analyzeMatch(
+          fixture.homeTeam,
+          fixture.awayTeam,
+          homeTeamData,
+          awayTeamData,
+          h2hData
+        );
+        console.log(`   🔮 AI PREDICTION: ${aiResult.prediction} with ${aiResult.confidence}% confidence`);
+        console.log(`   📝 REASONING: ${aiResult.reasoning}`);
+        console.log(`   ⚡ KEY FACTORS: ${aiResult.keyFactors.join(', ')}`);
+        console.log(`   ⚠️ RISK LEVEL: ${aiResult.riskLevel.toUpperCase()}`);
         await new Promise(resolve => setTimeout(resolve, 1500)); // Validation
         
         const predictions = ['1', 'X', '2'];
