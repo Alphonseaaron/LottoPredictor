@@ -12,6 +12,7 @@ export interface IStorage {
   createPrediction(prediction: InsertPrediction): Promise<Prediction>;
   getPredictionsByFixtureId(fixtureId: number): Promise<Prediction[]>;
   deletePredictionsByJackpotId(jackpotId: string): Promise<void>;
+  deletePredictionsByFixtureId(fixtureId: number): Promise<void>;
   
   // Jackpots
   createJackpot(jackpot: InsertJackpot): Promise<Jackpot>;
@@ -98,6 +99,17 @@ export class MemStorage implements IStorage {
     const entriesToDelete: number[] = [];
     this.predictions.forEach((prediction, id) => {
       if (fixtureIds.includes(prediction.fixtureId)) {
+        entriesToDelete.push(id);
+      }
+    });
+    
+    entriesToDelete.forEach(id => this.predictions.delete(id));
+  }
+
+  async deletePredictionsByFixtureId(fixtureId: number): Promise<void> {
+    const entriesToDelete: number[] = [];
+    this.predictions.forEach((prediction, id) => {
+      if (prediction.fixtureId === fixtureId) {
         entriesToDelete.push(id);
       }
     });

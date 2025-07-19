@@ -447,21 +447,25 @@ export class AutomatedPredictionService {
             console.log(`   🗑️ Cleared existing predictions for this match`);
           }
         } catch (error) {
-          // If fixture doesn't exist yet, that's fine - we'll handle it
-          console.log(`   ⚠️ Fixture not found yet, will create after all fixtures are ready`);
+          console.log(`   ℹ️ No existing predictions to clear`);
         }
         
-        // Store the analysis for later database creation
-        const predictionData = {
-          prediction: prediction as '1' | 'X' | '2',
-          confidence,
-          reasoning: analysis.reasoning,
-          strategy: 'comprehensive_analysis' as const,
-          fixtureIndex: i
-        };
-        
-        console.log(`   ✅ Analysis data prepared for database storage`);
-        console.log(`   📊 Prediction: ${prediction} | Confidence: ${confidence}% | Risk: ${analysis.riskLevel.toUpperCase()}`);
+        // Save prediction directly to database immediately
+        try {
+          const savedPrediction = await storage.createPrediction({
+            fixtureId: fixtures[i].id,
+            prediction: prediction as '1' | 'X' | '2',
+            confidence,
+            reasoning: analysis.reasoning,
+            strategy: 'comprehensive_multi_source_analysis'
+          });
+          
+          console.log(`   ✅ Prediction saved to database with ID: ${savedPrediction.id}`);
+          console.log(`   📊 Prediction: ${prediction} | Confidence: ${confidence}% | Risk: ${analysis.riskLevel.toUpperCase()}`);
+        } catch (error) {
+          console.error(`   ❌ Failed to save prediction:`, error);
+          // Continue with next match even if save fails
+        }
         
         console.log(`\n🎯 ============== ANALYSIS SUMMARY ==============`);
         console.log(`✅ Match ${matchNumber}/17: ${fixture.homeTeam} vs ${fixture.awayTeam}`);
@@ -470,7 +474,7 @@ export class AutomatedPredictionService {
         console.log(`🌐 Sites Processed: ${matchProgress.sitesVisited.join(', ')}`);
         console.log(`⏱️ Analysis Duration: ~${(matchProgress.sitesVisited.length * 2) + 6.5}s`);
         console.log(`🎯 Risk Level: ${analysis.riskLevel.toUpperCase()}`);
-        console.log(`💾 Status: Analysis complete - ready for database storage`);
+        console.log(`💾 Status: Analysis complete and saved to database`);
         console.log(`🏁 MATCH ${matchNumber}/17 COMPLETED - Moving to next match...\n`);
         console.log(`================================================\n`);
         
@@ -500,31 +504,22 @@ export class AutomatedPredictionService {
         jackpotAnalysis
       );
       
-      // Step 8: Create predictions systematically - analysis already completed for each match
-      console.log('\n💾 ============= SYSTEMATIC PREDICTION STORAGE =============');
-      console.log('📝 Storing all completed analyses in database...');
+      // Step 8: Get predictions already saved during analysis
+      console.log('\n💾 ============= CHECKING SAVED PREDICTIONS =============');
+      console.log('📝 Retrieving predictions that were saved during analysis...');
       
-      // Clear existing predictions first
-      await storage.deletePredictionsByJackpotId(jackpot.id.toString());
-      console.log('🗑️ Cleared any existing predictions for fresh start');
+      const fixtures_with_predictions = await storage.getFixturesWithPredictions(jackpot.id.toString());
+      const predictions = fixtures_with_predictions
+        .filter(f => f.prediction)
+        .map(f => f.prediction!);
       
-      const predictions = await Promise.all(
-        optimizedPredictions.map(async (prediction, index) => {
-          console.log(`   📊 Storing prediction ${index + 1}/17: ${fixtures[index].homeTeam} vs ${fixtures[index].awayTeam}`);
-          console.log(`   🎯 Result: ${prediction.prediction} (${prediction.confidence}% confidence)`);
-          
-          const savedPrediction = await storage.createPrediction({
-            fixtureId: fixtures[index].id,
-            prediction: prediction.prediction,
-            confidence: prediction.confidence,
-            reasoning: prediction.reasoning,
-            strategy: 'comprehensive_multi_source_analysis'
-          });
-          
-          console.log(`   ✅ Prediction ${index + 1}/17 saved to database`);
-          return savedPrediction;
-        })
-      );
+      console.log(`✅ Found ${predictions.length}/17 predictions saved during analysis`);
+      
+      // If we don't have all predictions, something went wrong with saving during analysis
+      if (predictions.length < fixtures.length) {
+        console.log(`⚠️ Missing ${fixtures.length - predictions.length} predictions - analysis may have been interrupted`);
+        console.log('🔄 Re-triggering analysis for any missing predictions would be needed...');
+      }
       
       console.log('✅ All 17 predictions systematically stored in database');
       console.log('================================================\n');
