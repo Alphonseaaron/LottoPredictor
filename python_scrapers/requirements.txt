@@ -1,0 +1,14 @@
+requests
+beautifulsoup4
+lxml
+selenium
+pandas
+numpy
+fake-useragent
+cloudscraper
+undetected-chromedriver
+playwright
+scrapy
+feedparser
+tweepy
+praw

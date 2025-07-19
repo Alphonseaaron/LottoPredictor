@@ -21,19 +21,33 @@ export class ComprehensiveAnalysisScraper {
   }
 
   async getComprehensiveMatchAnalysis(homeTeam: string, awayTeam: string): Promise<ComprehensiveAnalysisResult> {
-    console.log(`🔍 COMPREHENSIVE ANALYSIS: ${homeTeam} vs ${awayTeam}`);
-    console.log(`📊 Gathering data from 15+ sources for maximum confidence...`);
+    console.log(`🔍 ULTRA-COMPREHENSIVE ANALYSIS: ${homeTeam} vs ${awayTeam}`);
+    console.log(`📊 Using FREE data sources + Python scrapers for maximum coverage...`);
 
-    const analysisPromises = [
-      this.getBettingOdds(homeTeam, awayTeam),
-      this.getExpertPredictions(homeTeam, awayTeam),
-      this.getSocialMediaSentiment(homeTeam, awayTeam),
-      this.getForumConsensus(homeTeam, awayTeam),
-      this.getNewsAnalysis(homeTeam, awayTeam),
-      this.getInjuryReports(homeTeam, awayTeam),
-      this.getStadiumFactors(homeTeam),
-      this.getWeatherAnalysis(homeTeam)
-    ];
+    // Import free data scrapers
+    const { freeDataScraper } = await import('./free-data-scraper');
+    const { pythonWebScraper } = await import('./python-web-scraper');
+
+    // Run comprehensive data collection
+    const [freeDataResults, pythonResults, traditionalAnalysis] = await Promise.all([
+      freeDataScraper.getComprehensiveData(homeTeam, awayTeam),
+      pythonWebScraper.runPythonScraper(homeTeam, awayTeam),
+      Promise.all([
+        this.getBettingOdds(homeTeam, awayTeam),
+        this.getExpertPredictions(homeTeam, awayTeam),
+        this.getSocialMediaSentiment(homeTeam, awayTeam),
+        this.getForumConsensus(homeTeam, awayTeam),
+        this.getNewsAnalysis(homeTeam, awayTeam),
+        this.getInjuryReports(homeTeam, awayTeam),
+        this.getStadiumFactors(homeTeam),
+        this.getWeatherAnalysis(homeTeam)
+      ])
+    ]);
+
+    // Combine all data sources
+    const multiSourceAnalysis = freeDataScraper.analyzeMultiSourceData(freeDataResults);
+    
+    const analysisPromises = traditionalAnalysis;
 
     const [
       bettingOdds,
@@ -46,11 +60,12 @@ export class ComprehensiveAnalysisScraper {
       weatherConditions
     ] = await Promise.allSettled(analysisPromises);
 
+    // Enhanced result with multi-source data
     const result: ComprehensiveAnalysisResult = {
       teamName: `${homeTeam} vs ${awayTeam}`,
-      expertPredictions: this.extractValue(expertPredictions, []),
-      socialSentiment: this.extractValue(socialSentiment, 'neutral'),
-      bettingOdds: this.extractValue(bettingOdds, { home: 2.5, draw: 3.2, away: 2.8 }),
+      expertPredictions: this.combineExpertData(this.extractValue(expertPredictions, []), freeDataResults, pythonResults),
+      socialSentiment: this.extractValue(socialSentiment, multiSourceAnalysis.consensusPrediction),
+      bettingOdds: multiSourceAnalysis.bestOdds || this.extractValue(bettingOdds, { home: 2.5, draw: 3.2, away: 2.8 }),
       forumConsensus: this.extractValue(forumConsensus, 'mixed opinions'),
       newsAnalysis: this.extractValue(newsAnalysis, []),
       injuryReports: this.extractValue(injuryReports, []),
@@ -60,12 +75,49 @@ export class ComprehensiveAnalysisScraper {
       overallConfidence: 85
     };
 
+    // Add multi-source confidence boost
+    if (multiSourceAnalysis.sources.length > 0) {
+      result.overallConfidence = Math.max(result.overallConfidence, multiSourceAnalysis.overallConfidence);
+      result.confidenceFactors.push(`${multiSourceAnalysis.sources.length} verified data sources`);
+    }
+
+    if (pythonResults.length > 0) {
+      result.overallConfidence = Math.min(95, result.overallConfidence + 10);
+      result.confidenceFactors.push('Python advanced scraping successful');
+    }
+
     // Calculate confidence based on data quality
     result.confidenceFactors = this.calculateConfidenceFactors(result);
     result.overallConfidence = this.calculateOverallConfidence(result);
 
-    console.log(`✅ Comprehensive analysis complete - ${result.overallConfidence}% confidence`);
+    console.log(`✅ ULTRA-COMPREHENSIVE analysis complete - ${result.overallConfidence}% confidence`);
+    console.log(`📊 Data sources used: ${multiSourceAnalysis.sources.join(', ')}`);
+    if (pythonResults.length > 0) {
+      console.log(`🐍 Python scraper contributed ${pythonResults[0].confidence}% confidence`);
+    }
+    
     return result;
+  }
+
+  private combineExpertData(traditionalPredictions: string[], freeDataResults: any[], pythonResults: any[]): string[] {
+    const combined = [...traditionalPredictions];
+    
+    // Add free data predictions
+    for (const result of freeDataResults) {
+      if (result && result.predictions) {
+        combined.push(...result.predictions.slice(0, 2)); // Take top 2 predictions per source
+      }
+    }
+    
+    // Add Python scraping predictions
+    for (const pythonResult of pythonResults) {
+      if (pythonResult.data && pythonResult.data.data && pythonResult.data.data.tips) {
+        const tips = pythonResult.data.data.tips.slice(0, 3).map((tip: any) => `${tip.source}: ${tip.tip}`);
+        combined.push(...tips);
+      }
+    }
+    
+    return combined.slice(0, 10); // Limit to top 10 predictions
   }
 
   private async getBettingOdds(homeTeam: string, awayTeam: string): Promise<{ home: number; draw: number; away: number }> {
