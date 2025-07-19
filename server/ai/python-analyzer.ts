@@ -21,15 +21,29 @@ export class PythonAnalyzer {
     h2h: H2HRecord,
     sources?: string[]
   ): Promise<PythonAnalysisResult> {
-    // Filter sources to only include match-relevant data, no SEO tags or metadata
-    const cleanSources = (sources || []).filter(source => 
-      !source.includes('seo_tags') && 
-      !source.includes('retriesLeft') && 
-      !source.includes('description') &&
-      source.includes('vs')
-    );
+    // Get comprehensive analysis from multiple sources including social media, forums, expert predictions
+    console.log(`🚀 ULTRA-COMPREHENSIVE ANALYSIS: ${homeTeam} vs ${awayTeam}`);
+    console.log(`📊 Gathering data from betting sites, forums, social media, and expert predictions...`);
     
-    return this.getComprehensiveAnalysis(homeTeam, awayTeam, homeStats, awayStats, h2h, cleanSources);
+    const { comprehensiveAnalysisScraper } = await import('../scrapers/comprehensive-analysis-scraper');
+    
+    try {
+      // Get comprehensive analysis
+      const comprehensiveData = await comprehensiveAnalysisScraper.getComprehensiveMatchAnalysis(homeTeam, awayTeam);
+      
+      // Combine with existing statistical analysis
+      const statisticalAnalysis = await this.getComprehensiveAnalysis(homeTeam, awayTeam, homeStats, awayStats, h2h, sources);
+      
+      // Enhanced prediction with comprehensive data
+      const enhancedResult = await this.enhanceWithComprehensiveData(statisticalAnalysis, comprehensiveData);
+      
+      console.log(`🎯 FINAL CONFIDENCE: ${enhancedResult.confidence}% (Target: 90%+)`);
+      return enhancedResult;
+      
+    } catch (error) {
+      console.log(`⚠️ Comprehensive analysis failed, using statistical analysis`);
+      return this.getComprehensiveAnalysis(homeTeam, awayTeam, homeStats, awayStats, h2h, sources || []);
+    }
   }
 
   private async runPythonScript(dataFile: string): Promise<PythonAnalysisResult> {
@@ -274,7 +288,7 @@ except Exception as e:
     homeStats: TeamStats,
     awayStats: TeamStats,
     h2h: H2HRecord,
-    sources: string[]
+    sources: string[] = []
   ): PythonAnalysisResult {
     // Comprehensive football match analysis
     let homeScore = 55; // Base home advantage
