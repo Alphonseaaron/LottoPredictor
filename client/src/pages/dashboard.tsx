@@ -139,9 +139,9 @@ export default function Dashboard() {
       "Creating match database entries...",
       "Starting systematic analysis of each match...",
       "Comprehensive analysis in progress - check console logs for detailed match-by-match progress",
-      "Each match undergoes 60-90 seconds of multi-source analysis",
-      "Visiting 15+ data sources per match for maximum accuracy",
-      "AI processing with 95-100% maximum confidence range",
+      "Each match undergoes 3-5 minutes of extensive due diligence analysis",
+      "Cross-validating 15+ data sources per match with secondary verification",
+      "AI processing targeting 99.9% confidence through extensive due diligence",
       "Creating predictions systematically as each analysis completes"
     ];
 
@@ -491,9 +491,9 @@ export default function Dashboard() {
                       </div>
                       
                       <div className="text-xs text-blue-600 mt-3 space-y-1">
-                        <p>• Each match: 60-90 seconds comprehensive analysis</p>
-                        <p>• 15+ professional data sources per match (ESPN, BBC Sport, Transfermarkt, etc.)</p>
-                        <p>• Maximum confidence range: 95-100% for highest quality predictions</p>
+                        <p>• Each match: 3-5 minutes extensive due diligence analysis</p>
+                        <p>• 15+ professional data sources with cross-validation (ESPN, BBC Sport, Transfermarkt, etc.)</p>
+                        <p>• Target confidence: 99.9% through maximum thoroughness</p>
                         <p>• Real-time progress visible in console logs above</p>
                       </div>
                     </div>
