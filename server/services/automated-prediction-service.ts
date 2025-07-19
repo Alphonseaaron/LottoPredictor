@@ -38,15 +38,11 @@ export class AutomatedPredictionService {
    * Setup automatic scraping and prediction generation
    */
   setupAutomatedSchedule(): void {
-    console.log('🤖 Setting up automated SportPesa scraping...');
+    console.log('🤖 Automated background analysis disabled - using manual intensive analysis only');
+    console.log('🎯 Users can trigger intensive real sports analysis via Generate Predictions button');
     
-    // Check for new jackpots every 30 minutes
-    setInterval(async () => {
-      await this.checkForNewJackpot();
-    }, 30 * 60 * 1000); // 30 minutes
-    
-    // Initial check
-    setTimeout(() => this.checkForNewJackpot(), 5000); // 5 seconds delay
+    // Disable automatic background analysis to prevent interference with manual analysis
+    // Only manual prediction generation will perform the intensive multi-source research
   }
 
   /**
